@@ -1,5 +1,5 @@
 import "./RecentLeadsTable.css";
-import { maskPhone } from "../../../utils/maskPhone";
+
 import { useNavigate } from "react-router-dom";
 
 const RecentLeadsTable = ({ leads = [] }) => {
