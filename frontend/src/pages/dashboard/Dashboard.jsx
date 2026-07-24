@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import "./Dashboard.css";
 
-import DashboardHeader from "../../components/Dashboard/DashboardHeader";
-import StatsGrid from "../../components/Dashboard/StatsGrid";
-import RecentLeads from "../../components/Dashboard/RecentLeads";
-import RecentActivity from "../../components/Dashboard/RecentActivity";
-import TodayFollowups from "../../components/Dashboard/TodayFollowups";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import StatsGrid from "../../components/dashboard/StatsGrid";
+import RecentLeads from "../../components/dashboard/RecentLeads";
+import RecentActivity from "../../components/dashboard/RecentActivity";
+import TodayFollowups from "../../components/dashboard/TodayFollowups";
 
 import DashboardSkeleton from "../../components/Skeleton/DashboardSkeleton";
 
