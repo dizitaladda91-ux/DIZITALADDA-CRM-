@@ -3,10 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import ChangePassword from "../pages/auth/ChangePassword/ChangePassword";
 
-
+import Dashboard from "../pages/dashboard/Dashboard";
 import LeadManagement from "../pages/Lead/LeadManagement";
-import CampaignManagement from "../pages/Campaign/CampaignManagement";
-import CampaignForm from "../pages/Campaign/CampaignForm";
+import CampaignManagement from "../pages/campaign/CampaignManagement";
+import CampaignForm from "../pages/campaign/CampaignForm";
 
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
