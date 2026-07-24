@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import Modal from "../Common/Modal/Modal";
+import Modal from "../common/Modal/Modal";
 
 import "../../styles/LeadManagement/LeadAssignmentModal.css";
 
