@@ -14,7 +14,7 @@ console.log("DB Config:", {
 });
 
 const useConnectionString = Boolean(process.env.DATABASE_URL);
-// Supabase requires TLS for remote PostgreSQL connections. Set DB_SSL=false
+// Hosted PostgreSQL providers such as Neon require TLS. Set DB_SSL=false
 // only for a trusted local PostgreSQL instance.
 const useSsl = useConnectionString && process.env.DB_SSL !== "false";
 
