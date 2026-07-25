@@ -53,6 +53,10 @@ const validateEnv = () => {
 
   }
 
+  if (process.env.NODE_ENV === "production") {
+    required.push("CLIENT_URL");
+  }
+
   /**
    * -------------------------------------
    * Missing Variables
@@ -109,6 +113,8 @@ export const ENV = Object.freeze({
     process.env.JWT_REFRESH_EXPIRES_IN,
 
   DATABASE_URL: process.env.DATABASE_URL,
+
+  DB_SSL: process.env.DB_SSL === "true",
 
 });
 

@@ -13,17 +13,34 @@ console.log("DB Config:", {
   password: process.env.DB_PASSWORD ? "✅ Loaded" : "❌ Missing",
 });
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+const useConnectionString = Boolean(process.env.DATABASE_URL);
+// Supabase requires TLS for remote PostgreSQL connections. Set DB_SSL=false
+// only for a trusted local PostgreSQL instance.
+const useSsl = useConnectionString && process.env.DB_SSL !== "false";
+
+const pool = new Pool(
+  useConnectionString
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: useSsl ? { rejectUnauthorized: false } : false,
+        max: Number(process.env.DB_POOL_MAX || 5),
+      }
+    : {
+        host: process.env.DB_HOST,
+        port: Number(process.env.DB_PORT),
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        max: Number(process.env.DB_POOL_MAX || 5),
+      }
+);
 
 pool
   .connect()
-  .then(() => console.log("✅ PostgreSQL Connected Successfully"))
+  .then((client) => {
+    client.release();
+    console.log("✅ PostgreSQL Connected Successfully");
+  })
   .catch((err) => console.error("❌ PostgreSQL Error:", err.message));
 
 /* ============================================================================

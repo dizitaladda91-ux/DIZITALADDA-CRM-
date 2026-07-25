@@ -31,6 +31,11 @@ import employeePortalRoutes from "./routes/employeePortal.routes.js";
 
 const app = express();
 
+const allowedOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
 /**
  * =====================================================
  * Environment Validation
@@ -43,7 +48,24 @@ validateEnv();
  * Core Middlewares
  * =====================================================
  */
-app.use(cors());
+app.use(cors({
+  origin(origin, callback) {
+    // Requests without an Origin header include Render health checks and
+    // server-to-server calls, which do not need browser CORS protection.
+    if (!origin || process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin is not allowed by CORS."));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(express.json());
 
