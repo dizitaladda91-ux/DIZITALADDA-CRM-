@@ -5,7 +5,7 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-console.log("DB Config:", {
+void ({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
@@ -13,27 +13,37 @@ console.log("DB Config:", {
   password: process.env.DB_PASSWORD ? "✅ Loaded" : "❌ Missing",
 });
 
-const useConnectionString = Boolean(process.env.DATABASE_URL);
-// Hosted PostgreSQL providers such as Neon require TLS. Set DB_SSL=false
-// only for a trusted local PostgreSQL instance.
-const useSsl = useConnectionString && process.env.DB_SSL !== "false";
+const connectionString = process.env.DATABASE_URL?.trim();
 
-const pool = new Pool(
-  useConnectionString
-    ? {
-        connectionString: process.env.DATABASE_URL,
-        ssl: useSsl ? { rejectUnauthorized: false } : false,
-        max: Number(process.env.DB_POOL_MAX || 5),
-      }
-    : {
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        max: Number(process.env.DB_POOL_MAX || 5),
-      }
-);
+if (!connectionString) {
+  throw new Error("DATABASE_URL is required for the Neon PostgreSQL connection.");
+}
+
+let neonHost;
+
+try {
+  const databaseUrl = new URL(connectionString);
+
+  if (!databaseUrl.protocol.startsWith("postgres")) {
+    throw new Error("DATABASE_URL must use the postgresql:// protocol.");
+  }
+
+  neonHost = databaseUrl.hostname;
+} catch (error) {
+  throw new Error(`Invalid DATABASE_URL: ${error.message}`);
+}
+
+const pool = new Pool({
+  connectionString,
+  // Neon requires encrypted remote connections.
+  ssl: { rejectUnauthorized: false },
+  max: Number(process.env.DB_POOL_MAX || 5),
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 10_000,
+  keepAlive: true,
+});
+
+console.log(`PostgreSQL configured for Neon host: ${neonHost}`);
 
 pool
   .connect()
