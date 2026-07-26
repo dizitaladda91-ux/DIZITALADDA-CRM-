@@ -140,7 +140,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .auth-banner__illustration {
@@ -169,15 +170,16 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
+  margin-top: -8px;
 }
 
 .auth-stat-card {
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 10px 8px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(14px);
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
   animation: fadeInUp 0.7s ease both;
 }
 
@@ -186,8 +188,9 @@
 .auth-stat-card:nth-child(4) { animation-delay: 0.24s; }
 
 .auth-stat-card:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
 }
 
 .auth-stat-card svg {
