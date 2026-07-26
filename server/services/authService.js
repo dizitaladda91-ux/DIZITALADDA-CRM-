@@ -39,6 +39,7 @@ import {
 } from "../repositories/authRepository.js";
 
 import auditLogger from "../utils/auditLogger.js";
+import { verifyStoredPassword } from "../utils/passwordUtils.js";
 
 /**
  * =====================================================
@@ -137,19 +138,11 @@ export const loginUserService = async (
 
   }
 
-  let isPasswordCorrect = false;
   const isPasswordPlainText =
     typeof user.password === "string" &&
     !user.password.startsWith("$2");
 
-  if (isPasswordPlainText) {
-    isPasswordCorrect = password === user.password;
-  } else {
-    isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.password
-    );
-  }
+  const isPasswordCorrect = await verifyStoredPassword(password, user.password);
 
   console.log("Entered Password:", password);
   console.log("Password Match:", isPasswordCorrect);
@@ -273,11 +266,10 @@ export const changePasswordService = async (
         user.email
       );
 
-    const isPasswordCorrect =
-      await bcrypt.compare(
-        currentPassword,
-        loginUser.password
-      );
+    const isPasswordCorrect = await verifyStoredPassword(
+      currentPassword,
+      loginUser.password
+    );
 
     if (!isPasswordCorrect) {
 
@@ -288,11 +280,10 @@ export const changePasswordService = async (
 
     }
 
-    const isSamePassword =
-      await bcrypt.compare(
-        newPassword,
-        loginUser.password
-      );
+    const isSamePassword = await verifyStoredPassword(
+      newPassword,
+      loginUser.password
+    );
 
     if (isSamePassword) {
 
