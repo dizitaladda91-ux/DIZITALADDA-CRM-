@@ -134,6 +134,7 @@ app.use("/api", healthRoutes);
  * API Routes
  * =====================================================
  */
+app.use("/auth", authRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use("/api/campaigns", campaignRoutes);
