@@ -1,6 +1,5 @@
 import axiosInstance from "../api/axiosInstance";
 
-
 /*
 =========================================
 Dashboard Overview
@@ -36,7 +35,7 @@ export const getLeadAnalytics = async () => {
 class DashboardService {
 
     async getAdminDashboard() {
-        const response = await api.get("/dashboard");
+        const response = await axiosInstance.get("/dashboard");
         return response.data;
     }
 

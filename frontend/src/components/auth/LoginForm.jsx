@@ -41,7 +41,7 @@ if (response.success) {
 
   toast.success("Welcome Back 👋");
 
-  const role = response.data.user.role;
+  const role = response?.data?.user?.role || response?.user?.role;
 
   switch (role) {
 

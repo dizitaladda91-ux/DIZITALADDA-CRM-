@@ -36,8 +36,9 @@ export const AuthProvider = ({ children }) => {
       try {
 
         const response = await getProfile();
+        const profileUser = response?.data || response?.user || null;
 
-        setUser(response.data);
+        setUser(profileUser);
 
       }
 
@@ -63,23 +64,19 @@ export const AuthProvider = ({ children }) => {
 
     const response = await loginUser(credentials);
 
-      console.log("LOGIN RESPONSE", response);
-  console.log("TOKEN", response?.data?.token);
+    if (response?.success) {
+      const payload = response.data || {};
+      const token = payload.accessToken || payload.token;
+      const userData = payload.user || null;
 
-    if (response.success) {
+      if (token) {
+        localStorage.setItem("token", token);
+      }
 
-      localStorage.setItem(
-  "token",
-  response.data.accessToken
-);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(response.data.user)
-      );
-
-      setUser(response.data.user);
-
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+      }
     }
 
     return response;

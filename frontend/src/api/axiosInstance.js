@@ -3,7 +3,9 @@ import axios from "axios";
 const apiBaseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
   .trim();
 
-const normalizedBaseURL = apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`;
+const normalizedBaseURL = apiBaseUrl
+  .replace(/\/api\/?$/, "")
+  .replace(/\/$/, "");
 
 const axiosInstance = axios.create({
 
@@ -27,6 +29,17 @@ axiosInstance.interceptors.request.use((config) => {
 
     config.headers.Authorization = `Bearer ${token}`;
 
+  }
+
+  if (
+    config.url &&
+    !config.url.startsWith("http://") &&
+    !config.url.startsWith("https://") &&
+    config.url.startsWith("/")
+  ) {
+    config.url = config.url.startsWith("/api")
+      ? config.url
+      : `/api${config.url}`;
   }
 
   return config;
