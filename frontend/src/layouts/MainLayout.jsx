@@ -1,47 +1,30 @@
 import { Outlet } from "react-router-dom";
+import { useState } from "react";
 
 import Sidebar from "../components/layout/sidebar/Sidebar";
 import Topbar from "../components/layout/Topbar/Topbar";
 import PageContainer from "../components/PageContainer/PageContainer";
 
 const MainLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <div className="min-h-screen bg-slate-100 lg:flex">
+      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
 
-    <div className="flex min-h-screen bg-slate-100">
-
-      <Sidebar />
-
-      <div
-  className="flex flex-1 flex-col"
-  style={{
-    marginLeft: "280px",
-    width: "calc(100% - 280px)",
-  }}
->
-
+      <div className="flex flex-1 flex-col lg:ml-[280px] lg:w-[calc(100%-280px)]">
         <div className="sticky top-0 z-30 bg-white">
-
-          <Topbar />
-
+          <Topbar onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
         <main className="flex-1 overflow-y-auto">
-
           <PageContainer>
-
             <Outlet />
-
           </PageContainer>
-
         </main>
-
       </div>
-
     </div>
-
   );
-
 };
 
 export default MainLayout;

@@ -3,26 +3,27 @@ import SidebarProfile from "./SidebarProfile";
 import SidebarNavigation from "./SidebarNavigation";
 import SidebarFooter from "./SidebarFooter";
 import "./Sidebar.css";
-const Sidebar = () => {
+
+const Sidebar = ({ isOpen = false, onToggle = () => {} }) => {
   return (
-   <aside className="sidebar">
+    <>
+      <div className={`sidebar-overlay ${isOpen ? "show" : ""}`} onClick={onToggle} />
+      <aside className={`sidebar ${isOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <SidebarHeader />
+        </div>
 
-  {/* Header */}
-  <div className="sidebar-header">
-    <SidebarHeader />
-  </div>
+        <div className="sidebar-profile">
+          <SidebarProfile />
+        </div>
 
-  {/* Profile */}
-  <div className="sidebar-profile">
-    <SidebarProfile />
-  </div>
+        <div className="sidebar-nav">
+          <SidebarNavigation />
+        </div>
 
-  {/* Navigation */}
-  <div className="sidebar-nav">
-    <SidebarNavigation />
-  </div>
-
-</aside>
+        <SidebarFooter />
+      </aside>
+    </>
   );
 };
 
