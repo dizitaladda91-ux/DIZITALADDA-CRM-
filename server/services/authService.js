@@ -137,22 +137,48 @@ export const loginUserService = async (
 
   }
 
-  const isPasswordCorrect =
-    await bcrypt.compare(
+  let isPasswordCorrect = false;
+  const isPasswordPlainText =
+    typeof user.password === "string" &&
+    !user.password.startsWith("$2");
+
+  if (isPasswordPlainText) {
+    isPasswordCorrect = password === user.password;
+  } else {
+    isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
     );
+  }
 
   console.log("Entered Password:", password);
   console.log("Password Match:", isPasswordCorrect);
+  console.log("Password Stored As Plain Text:", isPasswordPlainText);
 
   if (!isPasswordCorrect) {
-
     throw new ApiError(
       401,
       "Invalid email or password."
     );
+  }
 
+  if (isPasswordPlainText) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await updatePasswordRepository(
+        client,
+        user.id,
+        hashedPassword
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Failed to upgrade plain-text password:", error);
+    } finally {
+      client.release();
+    }
   }
 
   await updateLastLoginRepository(user.id);
