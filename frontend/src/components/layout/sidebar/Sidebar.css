@@ -28,7 +28,7 @@
     position:fixed;
     left:0;
     top:0;
-    width:280px;
+    width:min(280px, 85vw);
     height:100vh;
     display:flex;
     flex-direction:column;
@@ -58,6 +58,16 @@
 .sidebar-overlay.show {
     opacity:1;
     pointer-events:auto;
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        transform:translateX(0);
+    }
+
+    .sidebar-overlay {
+        display:none;
+    }
 }
 
 

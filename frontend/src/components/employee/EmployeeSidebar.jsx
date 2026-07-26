@@ -45,7 +45,7 @@ const menuItems = [
   },
 ];
 
-const EmployeeSidebar = () => {
+const EmployeeSidebar = ({ isOpen = false, onToggle = () => {} }) => {
 
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -61,45 +61,42 @@ const EmployeeSidebar = () => {
   };
 
   return (
-    <aside className="employee-sidebar">
+    <>
+      <div className={`employee-sidebar-overlay ${isOpen ? "show" : ""}`} onClick={onToggle} />
+      <aside className={`employee-sidebar ${isOpen ? "open" : ""}`}>
+        <div className="employee-sidebar-logo">
+          <h2>IEM CRM</h2>
+          <span>Employee Portal</span>
+        </div>
 
-      <div className="employee-sidebar-logo">
-        <h2>IEM CRM</h2>
-        <span>Employee Portal</span>
-      </div>
+        <nav className="employee-sidebar-menu">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
 
-      <nav className="employee-sidebar-menu">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+                onClick={onToggle}
+              >
+                <Icon size={20} />
+                <span>{item.title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
 
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                isActive
-                  ? "sidebar-link active"
-                  : "sidebar-link"
-              }
-            >
-              <Icon size={20} />
-              <span>{item.title}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      <div className="employee-sidebar-footer">
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} />
-          <span>Logout</span>
-        </button>
-      </div>
-
-    </aside>
+        <div className="employee-sidebar-footer">
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

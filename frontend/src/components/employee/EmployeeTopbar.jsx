@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const EmployeeTopbar = () => {
+const EmployeeTopbar = ({ onMenuClick }) => {
 
   // Pehle user lo
   const { user } = useAuth();
@@ -32,7 +32,7 @@ const EmployeeTopbar = () => {
 
       <div className="topbar-left">
 
-        <button className="menu-toggle">
+        <button className="menu-toggle" onClick={onMenuClick}>
           <Menu size={22} />
         </button>
 

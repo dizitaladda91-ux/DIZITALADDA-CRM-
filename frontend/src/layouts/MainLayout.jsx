@@ -9,10 +9,10 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 lg:flex">
+    <div className="min-h-screen overflow-x-hidden bg-slate-100 md:flex">
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
 
-      <div className="flex flex-1 flex-col lg:ml-[280px] lg:w-[calc(100%-280px)]">
+      <div className="flex min-w-0 flex-1 flex-col md:ml-[280px] md:w-[calc(100%-280px)]">
         <div className="sticky top-0 z-30 bg-white">
           <Topbar onMenuClick={() => setSidebarOpen(true)} />
         </div>
