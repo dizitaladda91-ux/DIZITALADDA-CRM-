@@ -2,6 +2,21 @@ import "./RecentLeadsTable.css";
 
 import { useNavigate } from "react-router-dom";
 
+const maskPhone = (value) => {
+    if (!value) return "-";
+
+    const digits = String(value).replace(/\D/g, "");
+
+    if (digits.length <= 4) {
+        return digits;
+    }
+
+    const visibleStart = digits.slice(0, 3);
+    const visibleEnd = digits.slice(-2);
+
+    return `${visibleStart}*****${visibleEnd}`;
+};
+
 const RecentLeadsTable = ({ leads = [] }) => {
     const navigate = useNavigate();
     return (
