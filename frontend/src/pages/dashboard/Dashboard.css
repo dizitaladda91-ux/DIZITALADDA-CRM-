@@ -1,15 +1,9 @@
 .dashboard-page{
-
     display:flex;
-
     flex-direction:column;
-
     gap:24px;
-
-    padding:32px;
-
+    padding:0;
     min-height:100%;
-
 }
 
 .dashboard-middle{
@@ -33,13 +27,7 @@
 }
 
 @media(max-width:768px){
-
-.dashboard-page{
-
-    padding:20px;
-
-    gap:20px;
-
-}
-
+    .dashboard-page{
+        gap:20px;
+    }
 }
