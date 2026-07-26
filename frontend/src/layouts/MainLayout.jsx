@@ -9,15 +9,16 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-100 md:flex">
-      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+      />
 
-      <div className="flex min-w-0 flex-1 flex-col md:pl-[280px]">
-        <div className="sticky top-0 z-30 bg-white">
-          <Topbar onMenuClick={() => setSidebarOpen(true)} />
-        </div>
+      <div className="flex flex-1 flex-col md:ml-[280px]">
+        <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 p-6">
           <PageContainer>
             <Outlet />
           </PageContainer>
