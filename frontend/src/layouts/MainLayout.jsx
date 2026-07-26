@@ -18,11 +18,11 @@ const MainLayout = () => {
       <div className="flex flex-1 flex-col md:ml-[280px]">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-6">
-          <PageContainer>
-            <Outlet />
-          </PageContainer>
-        </main>
+        <div className="flex-1">
+  <PageContainer>
+    <Outlet />
+  </PageContainer>
+</div>
       </div>
     </div>
   );
