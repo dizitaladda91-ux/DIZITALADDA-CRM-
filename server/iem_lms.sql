@@ -239,6 +239,26 @@ INSERT INTO users (id, full_name, email, password, role, created_at, is_active, 
   (14, 'Rohit Kumar', 'rohit.kumars@iemlms.com', '$2b$10$0CkPoAU.v8LSO3eRVpvtaO8L6WVMGe9oY/q2z9KVUQ5zU62ahZaxK', 'COUNSELLOR', '2026-07-23T07:22:15.562Z', TRUE, FALSE, '2026-07-24T09:01:27.773Z', '2026-07-24T09:01:27.773Z', FALSE)
 ON CONFLICT DO NOTHING;
 
+-- Lead Sources table
+CREATE TABLE IF NOT EXISTS lead_sources (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  created_by INTEGER,
+  updated_by INTEGER,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO lead_sources (name, description, is_active, created_at) VALUES
+  ('Website', 'Captured via website form', TRUE, '2026-06-27T11:00:00.000Z'),
+  ('Google Ads', 'Paid search campaigns', TRUE, '2026-06-27T11:00:00.000Z'),
+  ('Meta', 'Meta / Facebook campaigns', TRUE, '2026-06-27T11:00:00.000Z'),
+  ('Referral', 'Referred by partner or student', TRUE, '2026-06-27T11:00:00.000Z')
+ON CONFLICT DO NOTHING;
+
 INSERT INTO departments (id, department_name, description, status, created_at, updated_at)
 VALUES (1, 'Sales', 'Sales Department', TRUE, '2026-06-28T06:33:25.689Z', '2026-06-28T06:33:25.689Z') ON CONFLICT DO NOTHING;
 

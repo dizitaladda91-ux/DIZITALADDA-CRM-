@@ -7,6 +7,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import LeadManagement from "../pages/Lead/LeadManagement";
 import CampaignManagement from "../pages/campaign/CampaignManagement";
 import CampaignForm from "../pages/campaign/CampaignForm";
+import LeadSources from "../pages/leadSources/LeadSources";
 
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
@@ -38,6 +39,8 @@ const AppRoutes = () => {
             <Route path="/leads" element={<LeadManagement />} />
 
             <Route path="/campaigns" element={<CampaignManagement />} />
+
+            <Route path="/lead-sources" element={<LeadSources />} />
 
             <Route path="/campaigns/new" element={<CampaignForm />} />
 

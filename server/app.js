@@ -21,6 +21,7 @@ from "./routes/leadAssignmentRoutes.js";
 import followupRoutes
 from "./routes/followupRoutes.js";
 import leadTimelineRoutes from "./routes/leadTimeline.routes.js";
+import leadSourceRoutes from "./routes/leadSourceRoutes.js";
 /* Middlewares */
 import { globalLimiter } from "./middleware/rateLimiter.js";
 import requestId from "./middleware/requestId.js";
@@ -167,6 +168,8 @@ app.use(
   "/api/leads",
   leadTimelineRoutes
 );
+
+app.use("/api/lead-sources", leadSourceRoutes);
 
 /**
  * =====================================================
