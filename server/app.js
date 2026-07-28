@@ -32,10 +32,19 @@ import employeePortalRoutes from "./routes/employeePortal.routes.js";
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_URL || "")
+const localDevelopmentOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://[::1]:5173",
+];
+
+const allowedOrigins = [...new Set([
+  ...(process.env.CLIENT_URL || "")
   .split(",")
   .map((origin) => origin.trim().replace(/\/$/, ""))
-  .filter(Boolean);
+  .filter(Boolean),
+  ...localDevelopmentOrigins,
+])];
 
 /**
  * =====================================================
