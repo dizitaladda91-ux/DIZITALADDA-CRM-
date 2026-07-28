@@ -11,7 +11,7 @@ import {
 import { NavLink, useNavigate } from "react-router-dom";
 import "./EmployeeSidebar.css";
 import { useAuth } from "../../context/AuthContext";
-import BrandMark from "../branding/BrandMark";
+import logo from "../../assets/logo/dizitaladda-logo.png";
 
 const menuItems = [
   {
@@ -66,11 +66,7 @@ const EmployeeSidebar = ({ isOpen = false, onToggle = () => {} }) => {
       <div className={`employee-sidebar-overlay ${isOpen ? "show" : ""}`} onClick={onToggle} />
       <aside className={`employee-sidebar ${isOpen ? "open" : ""}`}>
         <div className="employee-sidebar-logo">
-          <BrandMark className="employee-sidebar-mark" />
-          <div>
-            <h2>DIZITALADDA</h2>
-            <span>INSTITUTE OF</span>
-          </div>
+          <img src={logo} alt="DizitalAdda — India's Most Recommended Digital Marketing Institute" />
         </div>
 
         <nav className="employee-sidebar-menu">

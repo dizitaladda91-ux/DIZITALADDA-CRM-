@@ -1,4 +1,4 @@
-import BrandMark from "../branding/BrandMark";
+import logo from "../../assets/logo/dizitaladda-logo.png";
 import {
   Users,
   Megaphone,
@@ -20,11 +20,7 @@ const LoginBanner = () => {
       <div className="auth-banner__top">
         <div className="auth-brand">
           <div className="auth-brand__logo">
-            <BrandMark className="auth-brand__mark" />
-          </div>
-          <div className="auth-brand__text">
-            <h1>DIZITALADDA</h1>
-            <p>INSTITUTE OF</p>
+            <img src={logo} alt="DizitalAdda — India's Most Recommended Digital Marketing Institute" />
           </div>
         </div>
 

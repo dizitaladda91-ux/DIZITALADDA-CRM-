@@ -1,4 +1,4 @@
-import BrandMark from "../branding/BrandMark";
+import logo from "../../assets/logo/dizitaladda-logo.png";
 import LoginForm from "./LoginForm";
 import "./auth.css";
 
@@ -7,7 +7,7 @@ const LoginCard = () => {
     <div className="auth-card">
       <div className="auth-card__inner">
         <div className="auth-card__logo">
-          <BrandMark className="auth-card__mark" />
+          <img src={logo} alt="DizitalAdda — India's Most Recommended Digital Marketing Institute" />
         </div>
 
         <div className="auth-card__title">

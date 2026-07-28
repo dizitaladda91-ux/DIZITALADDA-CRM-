@@ -1,4 +1,4 @@
-import BrandMark from "../../branding/BrandMark";
+import logo from "../../../assets/logo/dizitaladda-logo.png";
 
 const SidebarHeader = () => {
 
@@ -8,15 +8,7 @@ const SidebarHeader = () => {
 
       <div className="brand-logo">
 
-        <BrandMark className="brand-logo__mark" />
-
-      </div>
-
-      <div className="brand-content">
-
-        <h1>DIZITALADDA</h1>
-
-        <p>INSTITUTE OF</p>
+        <img src={logo} alt="DizitalAdda — India's Most Recommended Digital Marketing Institute" />
 
       </div>
 
