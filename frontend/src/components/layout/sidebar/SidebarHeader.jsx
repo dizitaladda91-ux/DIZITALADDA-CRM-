@@ -1,4 +1,4 @@
-import { GraduationCap } from "lucide-react";
+import BrandMark from "../../branding/BrandMark";
 
 const SidebarHeader = () => {
 
@@ -8,15 +8,15 @@ const SidebarHeader = () => {
 
       <div className="brand-logo">
 
-        <GraduationCap size={28} />
+        <BrandMark className="brand-logo__mark" />
 
       </div>
 
       <div className="brand-content">
 
-        <h1>IEM LMS</h1>
+        <h1>DIZITALADDA</h1>
 
-        <p>Admissions CRM</p>
+        <p>INSTITUTE OF</p>
 
       </div>
 

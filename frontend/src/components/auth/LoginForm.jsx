@@ -84,7 +84,7 @@ if (response.success) {
         <Mail size={18} className="auth-input-icon" />
         <input
           type="email"
-          placeholder="admin@iemlms.com"
+          placeholder="admin@dizitaladda.com"
           {...register("email", {
             required: "Email is required",
             pattern: {
@@ -136,7 +136,7 @@ if (response.success) {
       <div className="auth-divider">Secure access</div>
 
       <div className="auth-footer">
-        <p>© 2026 IEM LMS</p>
+        <p>© 2026 DIZITALADDA</p>
         <p>Education CRM & Learning Management Platform</p>
       </div>
     </form>

@@ -1,4 +1,4 @@
-import logo from "../../assets/logo/logo.png";
+import BrandMark from "../branding/BrandMark";
 import LoginForm from "./LoginForm";
 import "./auth.css";
 
@@ -7,7 +7,7 @@ const LoginCard = () => {
     <div className="auth-card">
       <div className="auth-card__inner">
         <div className="auth-card__logo">
-          <img src={logo} alt="IEM LMS" />
+          <BrandMark className="auth-card__mark" />
         </div>
 
         <div className="auth-card__title">

@@ -9,7 +9,7 @@ const EmployeeFooter = () => {
 
       <div className="footer-left">
         <p>
-          © {currentYear} IEM CRM. All Rights Reserved.
+          © {currentYear} DIZITALADDA. All Rights Reserved.
         </p>
       </div>
 

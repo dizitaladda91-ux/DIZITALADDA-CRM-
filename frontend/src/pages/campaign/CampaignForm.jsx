@@ -216,7 +216,7 @@ onSubmit={handleSubmit(onSubmit)}
 
    <input
   type="url"
-  placeholder="https://iem.edu.in/admission"
+  placeholder="https://dizitaladda.com/admission"
   {...register("landing_page_url")}
 />
 

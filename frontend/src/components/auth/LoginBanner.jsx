@@ -1,4 +1,4 @@
-import logo from "../../assets/logo/logo.png";
+import BrandMark from "../branding/BrandMark";
 import {
   Users,
   Megaphone,
@@ -20,11 +20,11 @@ const LoginBanner = () => {
       <div className="auth-banner__top">
         <div className="auth-brand">
           <div className="auth-brand__logo">
-            <img src={logo} alt="IEM LMS" />
+            <BrandMark className="auth-brand__mark" />
           </div>
           <div className="auth-brand__text">
-            <h1>IEM</h1>
-            <p>Institute of Event Management</p>
+            <h1>DIZITALADDA</h1>
+            <p>INSTITUTE OF</p>
           </div>
         </div>
 

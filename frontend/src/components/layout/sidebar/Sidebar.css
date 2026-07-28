@@ -1,5 +1,5 @@
 /* ==========================================================
-   IEM LMS - Enterprise Sidebar
+   DIZITALADDA - Enterprise Sidebar
 ========================================================== */
 
 :root{
@@ -114,16 +114,10 @@
 
     justify-content:center;
 
-    color:white;
-
-    background:linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
+    background:#ffffff;
 
     box-shadow:
-        0 12px 30px rgba(37,99,235,.25);
+        0 12px 30px rgba(37,99,235,.18);
 
 }
 
@@ -141,7 +135,7 @@
 
     color:#0f172a;
 
-    font-size:22px;
+    font-size:17px;
 
     font-weight:700;
 
@@ -153,7 +147,9 @@
 
     color:#64748b;
 
-    font-size:13px;
+    font-size:11px;
+
+    letter-spacing:.12em;
 
 }
 
@@ -526,4 +522,12 @@
     .sidebar-overlay {
         display: none;
     }
+}
+
+.brand-logo__mark{
+
+    width:32px;
+
+    height:32px;
+
 }

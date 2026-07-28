@@ -11,6 +11,7 @@ import {
 import { NavLink, useNavigate } from "react-router-dom";
 import "./EmployeeSidebar.css";
 import { useAuth } from "../../context/AuthContext";
+import BrandMark from "../branding/BrandMark";
 
 const menuItems = [
   {
@@ -65,8 +66,11 @@ const EmployeeSidebar = ({ isOpen = false, onToggle = () => {} }) => {
       <div className={`employee-sidebar-overlay ${isOpen ? "show" : ""}`} onClick={onToggle} />
       <aside className={`employee-sidebar ${isOpen ? "open" : ""}`}>
         <div className="employee-sidebar-logo">
-          <h2>IEM CRM</h2>
-          <span>Employee Portal</span>
+          <BrandMark className="employee-sidebar-mark" />
+          <div>
+            <h2>DIZITALADDA</h2>
+            <span>INSTITUTE OF</span>
+          </div>
         </div>
 
         <nav className="employee-sidebar-menu">
