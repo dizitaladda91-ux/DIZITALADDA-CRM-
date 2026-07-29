@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import pkg from "pg";
+import logger from "../utils/logger.js";
 const { Pool } = pkg;
 
 const rawConnectionString = process.env.DATABASE_URL || "";
@@ -22,6 +23,16 @@ const pool = new Pool({
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
+});
+
+// Neon may close an idle pooled connection. The pg pool will replace it on the
+// next query, but this listener is required so the connection error does not
+// become an uncaught Node exception and stop the whole API service.
+pool.on("error", (error) => {
+  logger.error("PostgreSQL pool client error; connection will be replaced.", {
+    error: error.message,
+    stack: error.stack,
+  });
 });
 
 pool

@@ -138,6 +138,41 @@ body{
 :root[data-theme="dark"] .modal-content p,
 :root[data-theme="dark"] .drawer-content p { color: #aebdce; }
 
+/* Higher contrast and weight reduce eye strain on dark surfaces. */
+:root[data-theme="dark"] .employee-content,
+:root[data-theme="dark"] .campaign-page,
+:root[data-theme="dark"] .lead-management,
+:root[data-theme="dark"] .modal-content,
+:root[data-theme="dark"] .drawer-content {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+:root[data-theme="dark"] .employee-content p,
+:root[data-theme="dark"] .employee-content span:not([class*="status"]):not([class*="badge"]),
+:root[data-theme="dark"] .employee-content small,
+:root[data-theme="dark"] .campaign-page p,
+:root[data-theme="dark"] .campaign-page span,
+:root[data-theme="dark"] .lead-management p,
+:root[data-theme="dark"] .lead-management span,
+:root[data-theme="dark"] .modal-content p,
+:root[data-theme="dark"] .drawer-content p,
+:root[data-theme="dark"] label,
+:root[data-theme="dark"] td,
+:root[data-theme="dark"] th {
+  color: #d5dfed !important;
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] strong,
+:root[data-theme="dark"] button {
+  font-weight: 700;
+}
+
 :root[data-theme="dark"] .employee-content tr,
 :root[data-theme="dark"] .employee-content td,
 :root[data-theme="dark"] .employee-content th,
