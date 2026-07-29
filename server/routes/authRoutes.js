@@ -6,6 +6,7 @@ import {
   register,
   login,
   getProfile,
+  updateProfile,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -22,6 +23,7 @@ import {
   registerValidator,
   loginValidator,
   changePasswordValidator,
+  updateProfileValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
 } from "../validators/authValidator.js";
@@ -78,6 +80,14 @@ router.get(
   "/me",
   authMiddleware,
   getProfile
+);
+
+router.patch(
+  "/profile",
+  authMiddleware,
+  updateProfileValidator,
+  validate,
+  updateProfile
 );
 
 router.patch(

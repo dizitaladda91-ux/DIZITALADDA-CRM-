@@ -39,3 +39,8 @@ export const changePassword = async (payload) => {
     return response.data;
 
 };
+
+export const updateProfile = async (payload) => {
+  const response = await axiosInstance.patch("/auth/profile", payload);
+  return response.data;
+};

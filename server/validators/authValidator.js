@@ -93,6 +93,23 @@ export const changePasswordValidator = [
 
 ];
 
+export const updateProfileValidator = [
+  body("full_name")
+    .trim()
+    .notEmpty()
+    .withMessage("Full name is required.")
+    .isLength({ min: 3, max: 100 })
+    .withMessage("Full name must be between 3 and 100 characters."),
+  body("profile_image")
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage("Profile image must be a string.")
+    .isLength({ max: 2100000 })
+    .withMessage("Profile image is too large.")
+    .matches(/^data:image\/(png|jpeg|webp);base64,/)
+    .withMessage("Use a PNG, JPEG, or WebP image."),
+];
+
 export const forgotPasswordValidator = [
 
   body("email")

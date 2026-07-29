@@ -70,6 +70,84 @@ body{
 :root[data-theme="dark"] .employee-content [class*="table"],
 :root[data-theme="dark"] .employee-content [class*="header"] { border-color: #334155; }
 
+/* Keep every working surface dark: cards, tables, filter bars, drawers and dialogs
+   are styled in individual feature CSS files, so these shared overrides prevent
+   a bright panel from appearing when a new feature is opened. */
+:root[data-theme="dark"] .employee-content [class*="card"],
+:root[data-theme="dark"] .employee-content [class*="panel"],
+:root[data-theme="dark"] .employee-content [class*="table"],
+:root[data-theme="dark"] .employee-content [class*="filter"],
+:root[data-theme="dark"] .employee-content [class*="search"],
+:root[data-theme="dark"] .employee-content [class*="chart"],
+:root[data-theme="dark"] .employee-content [class*="section"],
+:root[data-theme="dark"] .employee-content [class*="empty"],
+:root[data-theme="dark"] .employee-footer,
+:root[data-theme="dark"] .campaign-page,
+:root[data-theme="dark"] .campaign-management,
+:root[data-theme="dark"] .campaign-form-page,
+:root[data-theme="dark"] .lead-management,
+:root[data-theme="dark"] .lead-sources-page,
+:root[data-theme="dark"] .lead-source-card,
+:root[data-theme="dark"] .dashboard-header,
+:root[data-theme="dark"] .lead-header,
+:root[data-theme="dark"] .lead-filters,
+:root[data-theme="dark"] .campaign-table-wrapper,
+:root[data-theme="dark"] .campaign-table-container,
+:root[data-theme="dark"] .modal-content,
+:root[data-theme="dark"] .drawer-content,
+:root[data-theme="dark"] .drawer-panel,
+:root[data-theme="dark"] .analytics-drawer {
+  background: #172033 !important;
+  color: #e2e8f0;
+  border-color: #334155 !important;
+}
+
+:root[data-theme="dark"] .employee-content [class*="table"] thead,
+:root[data-theme="dark"] .employee-content [class*="table"] th,
+:root[data-theme="dark"] .campaign-table-wrapper thead,
+:root[data-theme="dark"] .campaign-table-wrapper th,
+:root[data-theme="dark"] .lead-filters,
+:root[data-theme="dark"] .topbar-search {
+  background: #111827 !important;
+  color: #cbd5e1 !important;
+}
+
+:root[data-theme="dark"] .employee-content h1,
+:root[data-theme="dark"] .employee-content h2,
+:root[data-theme="dark"] .employee-content h3,
+:root[data-theme="dark"] .employee-content h4,
+:root[data-theme="dark"] .employee-content td,
+:root[data-theme="dark"] .employee-content th,
+:root[data-theme="dark"] .employee-content label,
+:root[data-theme="dark"] .campaign-page h1,
+:root[data-theme="dark"] .campaign-page h2,
+:root[data-theme="dark"] .campaign-page h3,
+:root[data-theme="dark"] .lead-management h1,
+:root[data-theme="dark"] .lead-management h2,
+:root[data-theme="dark"] .lead-management h3,
+:root[data-theme="dark"] .modal-content h1,
+:root[data-theme="dark"] .modal-content h2,
+:root[data-theme="dark"] .drawer-content h1,
+:root[data-theme="dark"] .drawer-content h2 { color: #f1f5f9 !important; }
+
+:root[data-theme="dark"] .employee-content p,
+:root[data-theme="dark"] .employee-content span:not([class*="status"]):not([class*="badge"]),
+:root[data-theme="dark"] .employee-content small,
+:root[data-theme="dark"] .campaign-page p,
+:root[data-theme="dark"] .lead-management p,
+:root[data-theme="dark"] .modal-content p,
+:root[data-theme="dark"] .drawer-content p { color: #aebdce; }
+
+:root[data-theme="dark"] .employee-content tr,
+:root[data-theme="dark"] .employee-content td,
+:root[data-theme="dark"] .employee-content th,
+:root[data-theme="dark"] .campaign-table-wrapper tr,
+:root[data-theme="dark"] .campaign-table-wrapper td,
+:root[data-theme="dark"] .campaign-table-wrapper th { border-color: #334155 !important; }
+
+:root[data-theme="dark"] .employee-content tr:hover td,
+:root[data-theme="dark"] .campaign-table-wrapper tr:hover td { background: #202d42 !important; }
+
 .custom-scrollbar::-webkit-scrollbar{
   width:6px;
 }

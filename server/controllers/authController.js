@@ -8,6 +8,7 @@ import {
 
 import {
   getProfileService,
+  updateOwnProfileService,
   changePasswordService,
 } from "../services/authService.js";
 
@@ -379,3 +380,10 @@ export const verifyEmail = asyncHandler(
 
   }
 );
+
+export const updateProfile = asyncHandler(async (req, res) => {
+  const user = await updateOwnProfileService(req.user.id, req.body);
+  return res.status(200).json(
+    new ApiResponse(200, user, "Profile updated successfully.")
+  );
+});

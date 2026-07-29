@@ -3,23 +3,11 @@ import {
   Menu,
   Search,
   Bell,
-  ChevronDown,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 import ThemeToggle from "../ThemeToggle";
+import ProfileMenu from "../profile/ProfileMenu";
 
 const EmployeeTopbar = ({ onMenuClick }) => {
-
-  // Pehle user lo
-  const { user } = useAuth();
-
-  // Fir initials banao
-  const initials = (user?.full_name || user?.name || "Employee")
-    .split(" ")
-    .map((name) => name[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
 
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
@@ -61,20 +49,7 @@ const EmployeeTopbar = ({ onMenuClick }) => {
           <span className="notification-badge">0</span>
         </button>
 
-        <div className="profile-avatar">
-          {initials}
-        </div>
-
-        <div className="profile-box">
-
-          <div className="profile-info">
-            <h4>{user?.full_name || user?.name || "Employee"}</h4>
-            <p>{user?.role || "Employee"}</p>
-          </div>
-
-          <ChevronDown size={18} />
-
-        </div>
+        <ProfileMenu />
 
       </div>
 

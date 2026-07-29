@@ -37,6 +37,7 @@ export const createUserRepository = async (
       full_name,
       email,
       role,
+      profile_image,
       is_active,
       is_deleted,
       email_verified,
@@ -136,6 +137,7 @@ async (id) => {
       full_name,
       email,
       role,
+      profile_image,
       is_active,
       is_deleted,
       email_verified,
@@ -154,6 +156,25 @@ async (id) => {
 
   return result.rows[0];
 
+};
+
+export const updateOwnProfileRepository = async (userId, profile) => {
+  const query = `
+    UPDATE users
+    SET full_name = $1,
+        profile_image = $2,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $3 AND is_deleted = FALSE
+    RETURNING id, full_name, email, role, profile_image, is_active, email_verified, updated_at;
+  `;
+
+  const result = await pool.query(query, [
+    profile.full_name,
+    profile.profile_image || null,
+    userId,
+  ]);
+
+  return result.rows[0];
 };
 
 /**

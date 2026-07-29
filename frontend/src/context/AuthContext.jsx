@@ -8,6 +8,7 @@ import {
 import {
   loginUser,
   getProfile,
+  updateProfile as updateProfileRequest,
 } from "../services/authService";
 
 const AuthContext = createContext();
@@ -92,6 +93,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
 
 };
+
+  const updateProfile = async (profile) => {
+    const response = await updateProfileRequest(profile);
+    const updatedUser = response?.data || response?.user || null;
+
+    if (updatedUser) {
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+
+    return response;
+  };
   return (
 
     <AuthContext.Provider
@@ -100,6 +113,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        updateProfile,
       }}
     >
 

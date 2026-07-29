@@ -36,6 +36,7 @@ import {
   findUserByIdRepository,
   updatePasswordRepository,
   updateEmailVerificationRepository,   
+  updateOwnProfileRepository,
 } from "../repositories/authRepository.js";
 
 import auditLogger from "../utils/auditLogger.js";
@@ -702,4 +703,15 @@ async (
 
   };
 
+};
+
+export const updateOwnProfileService = async (userId, profile) => {
+  const user = await updateOwnProfileRepository(userId, {
+    full_name: profile.full_name.trim(),
+    profile_image: profile.profile_image || null,
+  });
+
+  if (!user) throw new ApiError(404, "User not found.");
+
+  return user;
 };
