@@ -6,6 +6,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import ThemeToggle from "../ThemeToggle";
 
 const EmployeeTopbar = ({ onMenuClick }) => {
 
@@ -52,6 +53,8 @@ const EmployeeTopbar = ({ onMenuClick }) => {
         <div className="topbar-date">
           {today}
         </div>
+
+        <ThemeToggle />
 
         <button className="notification-btn">
           <Bell size={21} />

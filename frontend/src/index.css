@@ -17,7 +17,58 @@ body{
   font-family: Inter, sans-serif;
   background:#F8FAFC;
   color:#0F172A;
+  transition: background-color .2s ease, color .2s ease;
 }
+
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.theme-toggle:hover { background: #eef2ff; color: #2563eb; }
+
+/* Theme tokens and Tailwind utility overrides used across the admin portal. */
+:root[data-theme="dark"] body { background: #0f172a; color: #e2e8f0; }
+:root[data-theme="dark"] .bg-slate-100 { background-color: #0f172a !important; }
+:root[data-theme="dark"] .bg-white { background-color: #172033 !important; }
+:root[data-theme="dark"] .bg-slate-50 { background-color: #111827 !important; }
+:root[data-theme="dark"] .bg-slate-200 { background-color: #263247 !important; }
+:root[data-theme="dark"] .border-slate-100,
+:root[data-theme="dark"] .border-slate-200 { border-color: #334155 !important; }
+:root[data-theme="dark"] .text-slate-900,
+:root[data-theme="dark"] .text-slate-800 { color: #f1f5f9 !important; }
+:root[data-theme="dark"] .text-slate-700 { color: #cbd5e1 !important; }
+:root[data-theme="dark"] .text-slate-600,
+:root[data-theme="dark"] .text-slate-500 { color: #94a3b8 !important; }
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea { background-color: #111827; color: #e2e8f0; border-color: #475569; }
+:root[data-theme="dark"] .theme-toggle { background: #1e293b; border-color: #475569; color: #f8fafc; }
+:root[data-theme="dark"] .theme-toggle:hover { background: #334155; color: #93c5fd; }
+
+/* Counsellor portal uses component CSS rather than Tailwind utilities. */
+:root[data-theme="dark"] .employee-layout,
+:root[data-theme="dark"] .employee-content { background: #0f172a; }
+:root[data-theme="dark"] .employee-topbar { background: #172033; border-color: #334155; color: #e2e8f0; }
+:root[data-theme="dark"] .topbar-search,
+:root[data-theme="dark"] .notification-btn { background: #111827; border-color: #334155; color: #e2e8f0; }
+:root[data-theme="dark"] .menu-toggle { color: #e2e8f0; }
+:root[data-theme="dark"] .menu-toggle:hover,
+:root[data-theme="dark"] .notification-btn:hover { background: #263247; }
+:root[data-theme="dark"] .topbar-date,
+:root[data-theme="dark"] .profile-info p { color: #94a3b8; }
+:root[data-theme="dark"] .employee-content [class*="card"],
+:root[data-theme="dark"] .employee-content [class*="table"],
+:root[data-theme="dark"] .employee-content [class*="header"] { border-color: #334155; }
 
 .custom-scrollbar::-webkit-scrollbar{
   width:6px;
