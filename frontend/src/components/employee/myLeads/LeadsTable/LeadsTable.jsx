@@ -181,6 +181,7 @@
           lead={selectedLead}
           onClose={() => setIsDrawerOpen(false)}
           onStatusUpdated={onRefresh}
+          readOnly={false}
         />
       </div>
     );
