@@ -28,7 +28,7 @@ export const getProfile = async () => {
 
 export const changePassword = async (payload) => {
 
-    const response = await axiosInstance.put(
+    const response = await axiosInstance.patch(
 
         "/auth/change-password",
 

@@ -16,7 +16,7 @@ const ChangePassword = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    oldPassword: "",
+    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -48,7 +48,7 @@ const ChangePassword = () => {
 
       const response = await changePassword({
 
-        oldPassword: formData.oldPassword,
+        currentPassword: formData.currentPassword,
 
         newPassword: formData.newPassword,
 
@@ -107,9 +107,9 @@ const ChangePassword = () => {
 
         <input
           type="password"
-          name="oldPassword"
+          name="currentPassword"
           placeholder="Current Password"
-          value={formData.oldPassword}
+          value={formData.currentPassword}
           onChange={handleChange}
         />
 
