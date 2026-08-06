@@ -10,10 +10,11 @@ import {
   Building,
   AlertCircle,
   Tag,
-  CheckCircle2
+  CheckCircle2,
+  Edit3
 } from "lucide-react";
 
-import { getLeadById } from "../../../services/leadService";
+import { getLeadById, updateLeadStatus } from "../../../services/leadService";
 import {
   addLeadFeedback,
   getLeadFeedbackHistory,
@@ -41,23 +42,37 @@ const LeadDetailsDrawer = ({
 
   const [loading, setLoading] = useState(false);
   const [leadDetails, setLeadDetails] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Set default tab: "feedback" for counsellor so form is immediately accessible, "overview" for admin
+  const [activeTab, setActiveTab] = useState(isCounsellor ? "feedback" : "overview");
 
   // Feedback State
   const [feedbackHistory, setFeedbackHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Dynamic Feedback Form State
   const [selectedStatus, setSelectedStatus] = useState("CONTACTED");
   const [feedbackFields, setFeedbackFields] = useState({});
   const [remarks, setRemarks] = useState("");
 
+  // Status options list
+  const STATUS_OPTIONS = [
+    { value: "NEW", label: "New Lead" },
+    { value: "CONTACTED", label: "Not Contacted / Attempted" },
+    { value: "FOLLOW_UP", label: "Follow-up Required" },
+    { value: "QUALIFIED", label: "Walk-in Scheduled / Interested" },
+    { value: "ADMISSION_DONE", label: "Admission Done / Enrolled" },
+    { value: "NOT_INTERESTED", label: "Not Interested / Lost" },
+    { value: "REJECTED", label: "Rejected" },
+  ];
+
   // Role-based Tab Bar Definition
   const tabs = isCounsellor
     ? [
+        { id: "feedback", label: "Feedback & Status Update" },
         { id: "overview", label: "Overview" },
-        { id: "feedback", label: "Feedback & Status" },
       ]
     : [
         { id: "overview", label: "Overview" },
@@ -101,10 +116,35 @@ const LeadDetailsDrawer = ({
 
   useEffect(() => {
     if (open && lead?.id) {
+      setActiveTab(isCounsellor ? "feedback" : "overview");
       loadLeadData();
       loadFeedbackHistory();
     }
-  }, [open, lead?.id, loadLeadData, loadFeedbackHistory]);
+  }, [open, lead?.id, isCounsellor, loadLeadData, loadFeedbackHistory]);
+
+  // Handle direct status change in Overview tab for Counsellor
+  const handleDirectStatusChange = async (newStatus) => {
+    if (!lead?.id || !newStatus || newStatus === leadDetails?.status) return;
+
+    try {
+      setUpdatingStatus(true);
+      await updateLeadStatus(lead.id, { status: newStatus });
+
+      setSelectedStatus(newStatus);
+      await loadLeadData();
+
+      if (typeof onStatusUpdated === "function") {
+        onStatusUpdated();
+      }
+
+      alert(`Lead status updated to ${newStatus} successfully!`);
+    } catch (error) {
+      console.error("Failed to update lead status:", error);
+      alert(error?.response?.data?.message || "Failed to update lead status");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const handleFieldChange = (field, value) => {
     setFeedbackFields((prev) => ({
@@ -127,9 +167,11 @@ const LeadDetailsDrawer = ({
 
       await addLeadFeedback(lead.id, payload);
 
+      // Reset form
       setFeedbackFields({});
       setRemarks("");
 
+      // Refresh feedback history and lead details
       await loadFeedbackHistory();
       await loadLeadData();
 
@@ -137,7 +179,7 @@ const LeadDetailsDrawer = ({
         onStatusUpdated();
       }
 
-      alert("Feedback entry saved successfully!");
+      alert("Feedback entry saved & status/priority updated successfully!");
     } catch (error) {
       console.error("Failed to submit feedback:", error);
       alert(error?.response?.data?.message || "Failed to save feedback");
@@ -195,7 +237,7 @@ const LeadDetailsDrawer = ({
               </span>
             </div>
             <p className="mt-0.5 text-xs text-slate-500 font-mono">
-              Code: {currentLead?.lead_code} | View: <span className="uppercase font-bold text-blue-600">{role}</span>
+              Code: {currentLead?.lead_code} | Mode: <span className="uppercase font-bold text-blue-600">{role}</span>
             </p>
           </div>
 
@@ -252,7 +294,36 @@ const LeadDetailsDrawer = ({
                 <InfoItem label="Mobile" value={currentLead?.mobile} icon={<PhoneCall size={16} />} />
                 <InfoItem label="Email" value={currentLead?.email} icon={<User size={16} />} />
                 <InfoItem label="Course" value={currentLead?.course_name || currentLead?.interested_course || currentLead?.campaign_name} icon={<Building size={16} />} />
-                <InfoItem label="Status" value={currentLead?.status} icon={<Tag size={16} />} />
+                
+                {/* STATUS FIELD: Editable select for Counsellor, static for Admin */}
+                {isCounsellor ? (
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-3.5 shadow-2xs">
+                    <div className="flex items-center justify-between text-blue-700 mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <Tag size={16} />
+                        <span className="text-[11px] font-bold uppercase tracking-wider">
+                          Status (Editable)
+                        </span>
+                      </div>
+                      {updatingStatus && <span className="text-xs text-blue-600 animate-pulse">Updating...</span>}
+                    </div>
+                    <select
+                      value={currentLead?.status?.toUpperCase() || "NEW"}
+                      onChange={(e) => handleDirectStatusChange(e.target.value)}
+                      disabled={updatingStatus}
+                      className="w-full mt-1 rounded-lg border border-blue-300 bg-white px-2.5 py-1.5 text-sm font-bold text-blue-900 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <InfoItem label="Status" value={currentLead?.status} icon={<Tag size={16} />} />
+                )}
+
                 <InfoItem label="Priority" value={currentLead?.priority} icon={<AlertCircle size={16} />} />
                 <InfoItem label="Assigned To" value={currentLead?.assigned_employee} icon={<User size={16} />} />
                 <InfoItem
@@ -277,15 +348,18 @@ const LeadDetailsDrawer = ({
             </div>
           )}
 
-          {/* TAB 2: FEEDBACK */}
+          {/* TAB 2: FEEDBACK & STATUS UPDATE */}
           {activeTab === "feedback" && (
             <div className="space-y-6">
-              {/* Add Feedback Form (Counsellor view only) */}
+              {/* Add Feedback Form (ACTIVE & EDITABLE FOR COUNSELLOR) */}
               {isCounsellor && (
                 <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-4">
                     <PlusCircle className="text-blue-600" size={20} />
-                    <h3 className="text-base font-bold text-slate-800">Add Status & Feedback Entry</h3>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-800">Add Status & Feedback Entry</h3>
+                      <p className="text-xs text-slate-500">Record dynamic feedback and update lead status</p>
+                    </div>
                   </div>
 
                   <form onSubmit={handleFeedbackSubmit} className="space-y-4">
@@ -301,13 +375,11 @@ const LeadDetailsDrawer = ({
                         }}
                         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                       >
-                        <option value="NEW">New</option>
-                        <option value="CONTACTED">Not Contacted / Contacted</option>
-                        <option value="FOLLOW_UP">Follow-up Required</option>
-                        <option value="QUALIFIED">Walk-in Scheduled / Interested</option>
-                        <option value="ADMISSION_DONE">Admission Done / Enrolled</option>
-                        <option value="NOT_INTERESTED">Not Interested / Lost</option>
-                        <option value="REJECTED">Rejected</option>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
