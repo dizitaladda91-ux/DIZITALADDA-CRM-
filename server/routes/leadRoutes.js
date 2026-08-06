@@ -36,9 +36,13 @@ import {
   getLeadNotes,
   getLeadTimeline,
 
-} from "../controllers/leadController.js";
+import {
+  addLeadFeedback,
+  getLeadFeedbackHistory,
+} from "../controllers/leadFeedback.controller.js";
 
 const router = express.Router();
+
 
 /**
  * =====================================================
@@ -171,6 +175,24 @@ router.get(
   "/:id/timeline",
   authMiddleware,
   getLeadTimeline
+);
+
+/**
+ * =====================================================
+ * Lead Feedback
+ * =====================================================
+ */
+
+router.post(
+  "/:id/feedback",
+  authMiddleware,
+  addLeadFeedback
+);
+
+router.get(
+  "/:id/feedback",
+  authMiddleware,
+  getLeadFeedbackHistory
 );
 
 export default router;

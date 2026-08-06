@@ -539,12 +539,10 @@ const openAssignModal = () => {
 
 
 <LeadDetailsDrawer
-
   open={drawerOpen}
-
   lead={selectedLead}
-
   onClose={handleCloseDrawer}
+  onStatusUpdated={loadLeads}
 />
 
 <DeleteLeadModal

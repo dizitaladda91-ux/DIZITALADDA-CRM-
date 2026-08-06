@@ -160,30 +160,28 @@
     <Eye size={16} />
   </button>
 
-                    <button title="Add Follow-up">
+                    <button
+                      title="Add Follow-up"
+                      onClick={() => {
+                        setSelectedLead(lead);
+                        setIsDrawerOpen(true);
+                      }}
+                    >
                       <CalendarPlus size={16} />
                     </button>
-
-
-                    <LeadDetailsDrawer
-  open={isDrawerOpen}
-  lead={selectedLead}
-  onClose={() => setIsDrawerOpen(false)}
-  onStatusUpdated={onRefresh}
-/>
-
                   </div>
-
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
 
+        <LeadDetailsDrawer
+          open={isDrawerOpen}
+          lead={selectedLead}
+          onClose={() => setIsDrawerOpen(false)}
+          onStatusUpdated={onRefresh}
+        />
       </div>
     );
   };
