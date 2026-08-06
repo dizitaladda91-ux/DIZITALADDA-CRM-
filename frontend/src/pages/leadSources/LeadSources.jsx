@@ -1,9 +1,9 @@
-import { Globe2, Instagram, MapPin, MessageCircle, Plus, Search, Share2 } from "lucide-react";
+import { Camera, Globe2, MapPin, MessageCircle, Plus, Search, Share2 } from "lucide-react";
 import "./leadSources.css";
 
 const sources = [
   { name:"Website enquiry", channel:"Website", icon:<Globe2 size={19}/>, leads:"184", conversion:"16.8%", status:"Active" },
-  { name:"Instagram lead form", channel:"Meta", icon:<Instagram size={19}/>, leads:"126", conversion:"13.5%", status:"Active" },
+  { name:"Instagram lead form", channel:"Meta", icon:<Camera size={19}/>, leads:"126", conversion:"13.5%", status:"Active" },
   { name:"WhatsApp enquiry", channel:"WhatsApp", icon:<MessageCircle size={19}/>, leads:"89", conversion:"21.3%", status:"Active" },
   { name:"Walk-in referral", channel:"Offline", icon:<MapPin size={19}/>, leads:"42", conversion:"28.6%", status:"Active" },
 ];

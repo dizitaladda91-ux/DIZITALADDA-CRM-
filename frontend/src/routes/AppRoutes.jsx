@@ -10,6 +10,7 @@ import CampaignForm from "../pages/campaign/CampaignForm";
 import LeadSources from "../pages/leadSources/LeadSources";
 import AdminWorkspace from "../pages/admin/AdminWorkspace";
 import AdminSettings from "../pages/admin/Settings";
+import Employees from "../pages/admin/Employees";
 
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
@@ -43,7 +44,7 @@ const AppRoutes = () => {
 
             <Route path="/lead-sources" element={<LeadSources />} />
 
-            <Route path="/employees" element={<AdminWorkspace page="employees" />} />
+            <Route path="/employees" element={<Employees />} />
 
             <Route path="/followups" element={<AdminWorkspace page="followups" />} />
 
