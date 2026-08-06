@@ -181,7 +181,7 @@
           lead={selectedLead}
           onClose={() => setIsDrawerOpen(false)}
           onStatusUpdated={onRefresh}
-          readOnly={false}
+          role="counsellor"
         />
       </div>
     );

@@ -21,7 +21,7 @@ import {
   assignLead,
   assignBulkLeads,
 } from "../../services/leadAssignmentService";
-import LeadDetailsDrawer from "../../components/LeadManagement/LeadDetailsDrawer";
+import LeadDetailsDrawer from "../../components/common/LeadDetailsDrawer/LeadDetailsDrawer";
 import DeleteLeadModal from "../../components/LeadManagement/DeleteLeadModal";
 const LeadManagement = () => {
 
@@ -543,7 +543,7 @@ const openAssignModal = () => {
   lead={selectedLead}
   onClose={handleCloseDrawer}
   onStatusUpdated={loadLeads}
-  readOnly={false}
+  role="admin"
 />
 
 <DeleteLeadModal
