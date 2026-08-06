@@ -1,9 +1,8 @@
-const ComponentName = () => {
-  return (
-    <div>
-      <h1>Page Name</h1>
-    </div>
-  );
-};
+import { Camera, Mail, Phone, Save, UserRound } from "lucide-react";
+import "./Profile.css";
 
-export default ComponentName;
+const Profile = () => <section className="profile-page">
+  <header className="profile-header"><div><p>Account</p><h1>My profile</h1><span>Keep your team profile and contact details up to date.</span></div><button type="button"><Save size={17}/> Save changes</button></header>
+  <div className="profile-layout"><aside className="profile-summary"><div className="profile-avatar">RS</div><button type="button"><Camera size={15}/> Change photo</button><h2>Riya Sharma</h2><p>Admissions Counsellor</p><div><span>Department</span><strong>Design & Creative</strong></div><div><span>Active leads</span><strong>32</strong></div></aside><form className="profile-form"><h2>Personal information</h2><div className="profile-fields"><label>Full name<input defaultValue="Riya Sharma"/></label><label>Work email<input defaultValue="riya@dizitaladda.com" type="email"/></label><label>Mobile number<input defaultValue="+91 98765 43210"/></label><label>Designation<input defaultValue="Admissions Counsellor"/></label><label>Department<select defaultValue="Design & Creative"><option>Design & Creative</option><option>Marketing</option><option>Technology</option></select></label><label>Joining date<input defaultValue="15 Jan 2025"/></label></div><h2>About</h2><label className="profile-about">Short bio<textarea defaultValue="Helping students choose the right creative career path."/></label><div className="profile-contact"><Mail size={18}/><span>Email and phone information is visible to authorised team members only.</span><Phone size={18}/></div></form></div>
+</section>;
+export default Profile;
