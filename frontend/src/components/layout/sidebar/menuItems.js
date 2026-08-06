@@ -2,14 +2,13 @@ import {
   LayoutDashboard,
   UserPlus,
   Megaphone,
+  Radio,
   GraduationCap,
   BookOpen,
   Users,
+  PhoneCall,
   FileBarChart,
   Settings,
-  Library,
-  School,
-  Wallet,
 } from "lucide-react";
 
 const menuItems = [
@@ -37,6 +36,24 @@ const menuItems = [
         path: "/campaigns",
       },
 
+      {
+        title: "Lead Sources",
+        icon: Radio,
+        path: "/lead-sources",
+      },
+
+      {
+        title: "Employees",
+        icon: Users,
+        path: "/employees",
+      },
+
+      {
+        title: "Follow-ups",
+        icon: PhoneCall,
+        path: "/followups",
+      },
+
     ],
   },
 
@@ -56,9 +73,14 @@ const menuItems = [
         icon: BookOpen,
         path: "/students",
       },
+    ],
+  },
 
-      
-
+  {
+    title: "INSIGHTS & SETTINGS",
+    items: [
+      { title: "Reports", icon: FileBarChart, path: "/reports" },
+      { title: "Settings", icon: Settings, path: "/settings" },
     ],
   },
 

@@ -8,6 +8,8 @@ import LeadManagement from "../pages/Lead/LeadManagement";
 import CampaignManagement from "../pages/campaign/CampaignManagement";
 import CampaignForm from "../pages/campaign/CampaignForm";
 import LeadSources from "../pages/leadSources/LeadSources";
+import AdminWorkspace from "../pages/admin/AdminWorkspace";
+import AdminSettings from "../pages/admin/Settings";
 
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
@@ -15,7 +17,6 @@ import MainLayout from "../layouts/MainLayout";
 import EmployeeRoutes from "./EmployeeRoutes";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
-import MyLeads from "../pages/employee/MyLeads";
 
 const AppRoutes = () => {
   return (
@@ -41,6 +42,18 @@ const AppRoutes = () => {
             <Route path="/campaigns" element={<CampaignManagement />} />
 
             <Route path="/lead-sources" element={<LeadSources />} />
+
+            <Route path="/employees" element={<AdminWorkspace page="employees" />} />
+
+            <Route path="/followups" element={<AdminWorkspace page="followups" />} />
+
+            <Route path="/admissions" element={<AdminWorkspace page="admissions" />} />
+
+            <Route path="/students" element={<AdminWorkspace page="students" />} />
+
+            <Route path="/reports" element={<AdminWorkspace page="reports" />} />
+
+            <Route path="/settings" element={<AdminSettings />} />
 
             <Route path="/campaigns/new" element={<CampaignForm />} />
 
@@ -69,12 +82,6 @@ const AppRoutes = () => {
           />
 
         </Route>
-
-        <Route
-    path="/employee/my-leads"
-    element={<MyLeads />}
-/>
-
       </Route>
 
     </Routes>
