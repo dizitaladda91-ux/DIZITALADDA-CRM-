@@ -543,7 +543,7 @@ const openAssignModal = () => {
   lead={selectedLead}
   onClose={handleCloseDrawer}
   onStatusUpdated={loadLeads}
-  readOnly={true}
+  readOnly={false}
 />
 
 <DeleteLeadModal
