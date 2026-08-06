@@ -230,15 +230,13 @@ export const getLeadStatistics = asyncHandler(async (req, res) => {
 export const assignLead = asyncHandler(async (req, res) => {
 
   const lead = await assignLeadService(
-
     req.params.id,
-
     req.body.employee_id,
-
     req.user,
-
-    req
-
+    req,
+    req.body.remarks || req.body.note || null,
+    req.body.assignment_type || null,
+    req.body.priority || null
   );
 
   return res.status(200).json(

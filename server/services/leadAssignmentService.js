@@ -16,9 +16,17 @@ import {
 } from "../repositories/leadAssignmentRepository.js";
 
 import {
+  addTimelineEventService,
+} from "./leadTimeline.service.js";
+
+import {
   getLeadAssignmentsRepository,
   getAssignmentCountRepository,
 } from "../repositories/leadAssignmentRepository.js";
+
+import TIMELINE_ACTIVITY from "../constants/timelineActivity.js";
+
+import auditLogger from "../utils/auditLogger.js";
 
 /**
  * =====================================================
@@ -29,7 +37,9 @@ export const assignLeadService = async (
   leadId,
   employeeId,
   assignedBy,
-  remarks = null
+  remarks = null,
+  assignmentType = null,
+  priority = null
 ) => {
 
   const client = await pool.connect();
@@ -87,6 +97,14 @@ export const assignLeadService = async (
     /* ================================
        Save Assignment History
     ================================= */
+    const formattedRemarks = [
+      remarks,
+      assignmentType ? `Type: ${assignmentType}` : null,
+      priority ? `Priority: ${priority}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     await createAssignmentHistoryRepository(
       client,
       {
@@ -95,9 +113,27 @@ export const assignLeadService = async (
         assigned_to: employeeId,
         previous_assigned_to:
           lead.assigned_to,
-        remarks,
+        remarks: formattedRemarks || null,
       }
     );
+
+    await addTimelineEventService({
+      leadId,
+      employeeId,
+      activityType: TIMELINE_ACTIVITY.LEAD_ASSIGNED,
+      title: "Lead Assigned",
+      description: `Lead assigned to ${employee.full_name}.`,
+    });
+
+    auditLogger({
+      action: "LEAD_ASSIGNED",
+      module: "LEAD",
+      userId: assignedBy,
+      role: employee.role || null,
+      entityId: leadId,
+      requestId: null,
+      ip: null,
+    });
 
     await client.query("COMMIT");
 
@@ -166,7 +202,9 @@ export const reassignLeadService = async (
   leadId,
   employeeId,
   assignedBy,
-  remarks = null
+  remarks = null,
+  assignmentType = null,
+  priority = null
 ) => {
 
   // Existing assign service ko reuse karo
@@ -174,7 +212,9 @@ export const reassignLeadService = async (
     leadId,
     employeeId,
     assignedBy,
-    remarks
+    remarks,
+    assignmentType,
+    priority
   );
 
 };

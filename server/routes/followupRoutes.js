@@ -49,18 +49,6 @@ router.get(
 );
 
 router.get(
-  "/statistics",
-  authMiddleware,
-  getFollowupStatistics
-);
-
-router.get(
-  "/timeline/:leadId",
-  authMiddleware,
-  getLeadTimeline
-);
-
-router.get(
   "/:id",
   authMiddleware,
   getFollowupById

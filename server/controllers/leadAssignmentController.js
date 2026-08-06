@@ -28,6 +28,9 @@ export const assignLead = asyncHandler(
     const {
       employee_id,
       remarks,
+      note,
+      assignment_type,
+      priority,
     } = req.body;
 
     const assignedBy = req.user.id;
@@ -37,7 +40,9 @@ export const assignLead = asyncHandler(
         leadId,
         employee_id,
         assignedBy,
-        remarks
+        remarks || note || null,
+        assignment_type || null,
+        priority || null
       );
 
     return res.status(200).json({
@@ -106,6 +111,9 @@ export const reassignLead = async (
     const {
       employee_id,
       remarks,
+      note,
+      assignment_type,
+      priority,
     } = req.body;
 
     const data =
@@ -113,7 +121,9 @@ export const reassignLead = async (
         leadId,
         employee_id,
         req.user.id,
-        remarks
+        remarks || note || null,
+        assignment_type || null,
+        priority || null
       );
 
     return res.status(200).json({

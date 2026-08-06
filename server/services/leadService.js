@@ -26,6 +26,10 @@ import {
 } from "../repositories/employeeRepository.js";
 
 import {
+  createAssignmentHistoryRepository,
+} from "../repositories/leadAssignmentRepository.js";
+
+import {
   addLeadNoteRepository,
   getLeadNotesRepository,
   addLeadTimelineRepository,
@@ -492,7 +496,10 @@ export const assignLeadService = async (
   leadId,
   employeeId,
   currentUser,
-  req
+  req,
+  remarks = null,
+  assignmentType = null,
+  priority = null
 ) => {
 
   const client = await pool.connect();
@@ -527,42 +534,47 @@ export const assignLeadService = async (
 
     const updatedLead =
       await assignLeadRepository(
-
         client,
-
         leadId,
-
         employeeId,
-
         currentUser.id
-
       );
 
+    const formattedRemarks = [
+      remarks,
+      assignmentType ? `Type: ${assignmentType}` : null,
+      priority ? `Priority: ${priority}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
 
-      await addTimelineEventService({
-  leadId,
-  employeeId,
-  activityType: TIMELINE_ACTIVITY.LEAD_ASSIGNED,
-  title: "Lead Assigned",
-  description: `Lead assigned to ${employee.full_name}.`,
-});
+    await createAssignmentHistoryRepository(
+      client,
+      {
+        lead_id: leadId,
+        assigned_by: currentUser.id,
+        assigned_to: employeeId,
+        previous_assigned_to: lead.assigned_to,
+        remarks: formattedRemarks || null,
+      }
+    );
+
+    await addTimelineEventService({
+      leadId,
+      employeeId,
+      activityType: TIMELINE_ACTIVITY.LEAD_ASSIGNED,
+      title: "Lead Assigned",
+      description: `Lead assigned to ${employee.full_name}.`,
+    });
 
     auditLogger({
-
       action: "LEAD_ASSIGNED",
-
       module: "LEAD",
-
       userId: currentUser.id,
-
       role: currentUser.role,
-
       entityId: leadId,
-
       requestId: req.requestId,
-
       ip: req.ip,
-
     });
 
     await client.query("COMMIT");
@@ -834,11 +846,8 @@ export const getLeadTimelineService = async (
 // =====================================================
 
 export const assignBulkLeadsService = async (
-
   payload,
-
   currentUser
-
 ) => {
 
   const client = await pool.connect();
@@ -848,28 +857,79 @@ export const assignBulkLeadsService = async (
     await client.query("BEGIN");
 
     const {
-
       lead_ids,
-
       employee_id,
-
+      remarks = null,
+      assignment_type = null,
+      priority = null,
     } = payload;
 
-    const result = await assignBulkLeadsRepository(
-
-      client,
-
-      {
-
-        lead_ids,
-
-        employee_id,
-
-        updated_by: currentUser.id,
-
-      }
-
+    const existingLeadsResult = await client.query(
+      `SELECT id, assigned_to FROM leads WHERE id = ANY($1::bigint[]) AND is_deleted = FALSE;`,
+      [lead_ids]
     );
+
+    const previousAssignments = Object.fromEntries(
+      existingLeadsResult.rows.map((row) => [
+        String(row.id),
+        row.assigned_to,
+      ])
+    );
+
+    const result = await assignBulkLeadsRepository(
+      client,
+      {
+        lead_ids,
+        employee_id,
+        updated_by: currentUser.id,
+      }
+    );
+
+    const formattedRemarks = [
+      remarks,
+      assignment_type ? `Type: ${assignment_type}` : null,
+      priority ? `Priority: ${priority}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
+    await Promise.all(
+      result.leads.map((lead) =>
+        createAssignmentHistoryRepository(
+          client,
+          {
+            lead_id: lead.id,
+            assigned_by: currentUser.id,
+            assigned_to: employee_id,
+            previous_assigned_to:
+              previousAssignments[String(lead.id)] || null,
+            remarks: formattedRemarks || null,
+          }
+        )
+      )
+    );
+
+    await Promise.all(
+      result.leads.map((lead) =>
+        addTimelineEventService({
+          leadId: lead.id,
+          employeeId: employee_id,
+          activityType: TIMELINE_ACTIVITY.LEAD_ASSIGNED,
+          title: "Lead Assigned",
+          description: `Lead assigned to employee ID ${employee_id}.`,
+        })
+      )
+    );
+
+    auditLogger({
+      action: "LEAD_BULK_ASSIGNED",
+      module: "LEAD",
+      userId: currentUser.id,
+      role: currentUser.role,
+      entityId: null,
+      requestId: null,
+      ip: null,
+    });
 
     await client.query("COMMIT");
 
