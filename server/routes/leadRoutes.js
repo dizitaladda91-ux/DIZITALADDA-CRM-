@@ -7,34 +7,29 @@ import validate from "../middleware/validate.js";
 import ROLES from "../constants/roles.js";
 
 import {
-
   createLeadValidator,
   updateLeadValidator,
   assignLeadValidator,
   assignBulkLeadValidator,
   updateLeadStatusValidator,
   addLeadNoteValidator,
-
 } from "../validators/lead.validator.js";
-import {
 
+import {
   createLead,
   getAllLeads,
   getLeadById,
   updateLead,
   deleteLead,
   restoreLead,
-
   getLeadStatistics,
-
   assignLead,
   assignBulkLeads,
-
   updateLeadStatus,
-
   addLeadNote,
   getLeadNotes,
   getLeadTimeline,
+} from "../controllers/leadController.js";
 
 import {
   addLeadFeedback,
@@ -42,7 +37,6 @@ import {
 } from "../controllers/leadFeedback.controller.js";
 
 const router = express.Router();
-
 
 /**
  * =====================================================
@@ -120,7 +114,6 @@ router.patch(
   validate,
   assignLead
 );
-
 
 router.post(
   "/assign-bulk",
