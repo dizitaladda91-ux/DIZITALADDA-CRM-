@@ -9,6 +9,7 @@ import {
     deleteEmployeeService,
     restoreEmployeeService,
     getEmployeeStatisticsService,
+    getEmployeePerformanceService,
 } from "../services/employeeService.js";
 import { getMyLeadsService } from "../services/employeeService.js";
 /**
@@ -267,6 +268,11 @@ export const getEmployeeStatisticsController = asyncHandler(
     }
 
 );
+
+export const getEmployeePerformanceController = asyncHandler(async (req, res) => {
+    const performance = await getEmployeePerformanceService(req.params.id);
+    return res.status(200).json(new ApiResponse(200, performance, "Employee performance fetched successfully."));
+});
 
 /**
  * =====================================================

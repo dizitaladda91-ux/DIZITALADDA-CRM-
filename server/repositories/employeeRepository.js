@@ -895,3 +895,35 @@ export const getEmployeeStatisticsRepository = async () => {
     return rows[0];
 
 };
+
+export const getEmployeePerformanceRepository = async (employeeId) => {
+    const [summaryResult, dailyResult, domainsResult] = await Promise.all([
+        pool.query(`
+          SELECT
+            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE) AS total_leads,
+            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'PENDING') AS pending_followups,
+            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'COMPLETED') AS completed_followups,
+            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'COMPLETED' AND lf.updated_at::date = CURRENT_DATE) AS completed_today
+          FROM employees e
+          LEFT JOIN leads l ON l.assigned_to = e.id
+          LEFT JOIN lead_followups lf ON lf.employee_id = e.id
+          WHERE e.id = $1
+        `, [employeeId]),
+        pool.query(`
+          SELECT completed_on AS date, COUNT(lf.id)::int AS completed
+          FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, INTERVAL '1 day') completed_on
+          LEFT JOIN lead_followups lf ON lf.employee_id = $1 AND lf.is_deleted = FALSE
+            AND lf.status = 'COMPLETED' AND lf.updated_at::date = completed_on::date
+          GROUP BY completed_on
+          ORDER BY completed_on
+        `, [employeeId]),
+        pool.query(`
+          SELECT d.name
+          FROM counsellor_routing_assignments ra
+          JOIN lead_domains d ON d.id = ra.domain_id
+          WHERE ra.employee_id = $1 AND ra.is_active = TRUE
+          GROUP BY d.id, d.name ORDER BY d.name
+        `, [employeeId]),
+    ]);
+    return { summary: summaryResult.rows[0], daily: dailyResult.rows, domains: domainsResult.rows.map((row) => row.name) };
+};

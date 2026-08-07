@@ -26,6 +26,7 @@ import {
 
     getEmployeesRepository,
     getEmployeeStatisticsRepository,
+    getEmployeePerformanceRepository,
 
 } from "../repositories/employeeRepository.js";
 
@@ -522,4 +523,10 @@ export const getMyLeadsService = async (
 
   });
 
+};
+
+export const getEmployeePerformanceService = async (id) => {
+    const employee = await findEmployeeByIdRepository(id);
+    if (!employee) throw new ApiError(404, "Employee not found.");
+    return { employee, ...(await getEmployeePerformanceRepository(id)) };
 };

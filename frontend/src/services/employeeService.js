@@ -72,3 +72,8 @@ export const getEmployeeStatistics = async () => {
   const response = await axiosInstance.get("/employees/statistics");
   return response.data;
 };
+
+export const getEmployeePerformance = async (id) => {
+  const response = await axiosInstance.get(`/employees/${id}/performance`);
+  return response.data;
+};
