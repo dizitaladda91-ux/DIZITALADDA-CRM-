@@ -14,7 +14,7 @@ import {
 
 /**
  * Shared LeadDetailsDrawer Component
- * Redesigned 3-Tab SaaS CRM lead panel with compact summary header, dynamic academic level switcher, counsellor feedback timeline, and sticky footer.
+ * Refactored 3-Tab SaaS CRM lead panel with guided workflow, dynamic education level switcher, vertical interaction history timeline, and spacious 850–950px desktop layout.
  */
 const LeadDetailsDrawer = ({
   open = false,
@@ -24,8 +24,8 @@ const LeadDetailsDrawer = ({
   role = "counsellor",
 }) => {
   const isAdmin = role === "admin";
-  const isCounsellor = role === "counsellor";
-  const isEditable = isCounsellor; // Counsellors have full edit capabilities; Admin views complete audit trail
+  const isCounsellor = role === "counsellor" || role === "employee";
+  const isEditable = isCounsellor; // Counsellors are guided through interactive counselling workflow; Admin views read-only audit trail
 
   const [loading, setLoading] = useState(false);
   const [leadDetails, setLeadDetails] = useState(null);
@@ -73,7 +73,7 @@ const LeadDetailsDrawer = ({
       const leadData = response.data || response;
       setLeadDetails(leadData);
 
-      // Populate personal info form state
+      // Hydrate personal info state
       setPersonalData({
         full_name: leadData.full_name || "",
         mobile: leadData.mobile || "",
@@ -83,7 +83,7 @@ const LeadDetailsDrawer = ({
         state: leadData.state || "Uttar Pradesh",
       });
 
-      // Populate academic info form state
+      // Hydrate academic info state
       setAcademicData((prev) => ({
         ...prev,
         interested_course: leadData.interested_course || leadData.course_name || "BCA",
@@ -108,7 +108,7 @@ const LeadDetailsDrawer = ({
       const historyList = res.data || res || [];
       setFeedbackHistory(historyList);
 
-      // If history has recorded academic fields, hydrate academicData form state
+      // Hydrate saved academic fields if present in history
       if (historyList.length > 0) {
         const latestFeedback = historyList[0];
         const fields = latestFeedback.feedback_fields || {};
@@ -169,7 +169,7 @@ const LeadDetailsDrawer = ({
         onStatusUpdated();
       }
 
-      alert("Lead profile, status & feedback updated successfully!");
+      alert("Lead profile, academic details, status & feedback saved successfully!");
     } catch (error) {
       console.error("Failed to save changes:", error);
       alert(error?.response?.data?.message || "Failed to save lead updates");
@@ -201,27 +201,27 @@ const LeadDetailsDrawer = ({
         onClick={onClose}
       />
 
-      {/* Responsive Drawer Container (~750px–840px on Desktop, 100% on Mobile) */}
+      {/* Spacious CRM Drawer Container (850px–950px on Desktop, 85vw on Tablet, 100vw on Mobile) */}
       <aside
         className="
-          fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-slate-50 shadow-2xl transition-all duration-300 sm:w-[680px] lg:w-[780px] xl:w-[840px]
+          fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-slate-50 shadow-2xl transition-all duration-300 sm:w-[750px] md:w-[850px] lg:w-[900px] xl:w-[940px]
         "
       >
-        {/* ================= COMPACT TOP HEADER ================= */}
+        {/* COMPACT TOP SUMMARY HEADER */}
         <LeadSummaryHeader
           lead={currentLead}
           role={role}
           onClose={onClose}
         />
 
-        {/* ================= 3-TAB HORIZONTAL NAV BAR ================= */}
+        {/* 3-TAB HORIZONTAL NAV BAR */}
         <LeadDetailsTabsNav
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
 
-        {/* ================= INDEPENDENT SCROLLING TAB CONTENT AREA ================= */}
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* INDEPENDENT SCROLLING TAB CONTENT AREA */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* TAB 1: PERSONAL INFORMATION */}
           {activeTab === "personal" && (
             <PersonalInformationTab
@@ -229,7 +229,6 @@ const LeadDetailsDrawer = ({
               onFormChange={setPersonalData}
               lead={currentLead}
               isEditable={isEditable}
-              onQuickAction={setActiveTab}
             />
           )}
 
@@ -261,7 +260,7 @@ const LeadDetailsDrawer = ({
           )}
         </div>
 
-        {/* ================= STICKY FOOTER ACTIONS ================= */}
+        {/* STICKY BOTTOM ACTION FOOTER */}
         <LeadDrawerFooter
           onCancel={onClose}
           onSave={handleSaveChanges}
