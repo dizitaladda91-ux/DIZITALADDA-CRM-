@@ -16,6 +16,7 @@ import {
   bulkRestoreFollowupsService,
   bulkAssignFollowupsService,
 } from "../services/followupService.js";
+import { findEmployeeByUserIdRepository } from "../repositories/employeeRepository.js";
 
 
 /**
@@ -49,9 +50,19 @@ export const createFollowup = asyncHandler(
 export const getAllFollowups = asyncHandler(
   async (req, res) => {
 
+    const filters = { ...req.query };
+
+    if (req.user.role === "COUNSELLOR") {
+      const employee = await findEmployeeByUserIdRepository(req.user.id);
+      if (!employee) {
+        return res.status(200).json({ success: true, message: "Follow-ups fetched successfully.", data: { data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } } });
+      }
+      filters.employeeId = employee.id;
+    }
+
     const followups =
       await getAllFollowupsService(
-        req.query
+        filters
       );
 
     res.status(200).json({

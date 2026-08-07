@@ -71,6 +71,18 @@ export const capturePublicLeadValidator = [
   body("external_lead_id")
     .optional()
     .trim()
-    .isLength({ max: 255 })
+    .isLength({ max: 255 }),
+
+  body("domain")
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isLength({ max: 150 })
+    .withMessage("Domain cannot exceed 150 characters."),
+
+  body("interested_course")
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Interested course cannot exceed 200 characters.")
 
 ];

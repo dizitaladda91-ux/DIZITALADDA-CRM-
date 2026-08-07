@@ -5,6 +5,7 @@ import PersonalInformationTab from "./PersonalInformationTab";
 import AcademicInformationTab from "./AcademicInformationTab";
 import CounsellorNotesTab from "./CounsellorNotesTab";
 import LeadDrawerFooter from "./LeadDrawerFooter";
+import "./LeadDetailsDrawer.css";
 
 import { getLeadById } from "../../../services/leadService";
 import {
@@ -14,7 +15,8 @@ import {
 
 /**
  * Shared LeadDetailsDrawer Component
- * Refactored 3-Tab SaaS CRM lead panel with guided workflow, dynamic education level switcher, vertical interaction history timeline, and spacious 850–950px desktop layout.
+ * Enterprise CRM Lead Panel shared between Admin and Employee portals.
+ * Uses 100% shared JSX, components, and CSS stylesheet.
  */
 const LeadDetailsDrawer = ({
   open = false,
@@ -182,10 +184,19 @@ const LeadDetailsDrawer = ({
 
   if (loading && !leadDetails) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-xs">
-        <div className="rounded-2xl bg-white p-8 shadow-2xl flex items-center gap-3 border border-slate-200">
-          <div className="h-6 w-6 animate-spin rounded-full border-3 border-blue-600 border-t-transparent" />
-          <span className="font-extrabold text-slate-800 text-sm">Loading Lead Details...</span>
+      <div className="crm-drawer-backdrop" style={{ display: "flex", itemsCenter: "center", justifyContent: "center" }}>
+        <div className="crm-card" style={{ padding: "32px", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              height: "24px",
+              width: "24px",
+              borderRadius: "50%",
+              border: "3px solid #2563EB",
+              borderTopColor: "transparent",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <span style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>Loading Lead Details...</span>
         </div>
       </div>
     );
@@ -196,21 +207,13 @@ const LeadDetailsDrawer = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
-      />
+      <div className="crm-drawer-backdrop" onClick={onClose} />
 
-      {/* Spacious CRM Drawer Container (850px–950px on Desktop, 85vw on Tablet, 100vw on Mobile) */}
-      <aside
-        className="
-          fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-slate-50 shadow-2xl transition-all duration-300 sm:w-[750px] md:w-[850px] lg:w-[900px] xl:w-[940px]
-        "
-      >
+      {/* Spacious CRM Drawer Panel */}
+      <aside className="crm-drawer-panel">
         {/* COMPACT TOP SUMMARY HEADER */}
         <LeadSummaryHeader
           lead={currentLead}
-          role={role}
           onClose={onClose}
         />
 
@@ -221,13 +224,12 @@ const LeadDetailsDrawer = ({
         />
 
         {/* INDEPENDENT SCROLLING TAB CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="crm-body-content">
           {/* TAB 1: PERSONAL INFORMATION */}
           {activeTab === "personal" && (
             <PersonalInformationTab
               formData={personalData}
               onFormChange={setPersonalData}
-              lead={currentLead}
               isEditable={isEditable}
             />
           )}

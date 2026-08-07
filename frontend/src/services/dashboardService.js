@@ -35,7 +35,7 @@ export const getLeadAnalytics = async () => {
 class DashboardService {
 
     async getAdminDashboard() {
-        const response = await axiosInstance.get("/dashboard");
+        const response = await axiosInstance.get("/dashboard/overview");
         return response.data;
     }
 

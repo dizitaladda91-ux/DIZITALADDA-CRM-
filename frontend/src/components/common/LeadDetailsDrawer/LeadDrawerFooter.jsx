@@ -1,9 +1,10 @@
 import React from "react";
 import { Save, X } from "lucide-react";
+import "./LeadDetailsDrawer.css";
 
 /**
  * LeadDrawerFooter Component
- * Sticky action footer containing left Cancel button and right Save Changes primary button.
+ * Shared action footer using enterprise CSS button styles.
  */
 const LeadDrawerFooter = ({
   onCancel,
@@ -12,12 +13,12 @@ const LeadDrawerFooter = ({
   isEditable = true,
 }) => {
   return (
-    <div className="sticky bottom-0 z-30 flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-lg">
+    <div className="crm-footer">
       {/* LEFT: Cancel Button */}
       <button
         type="button"
         onClick={onCancel}
-        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-xs font-extrabold text-red-600 hover:bg-red-50 hover:border-red-300 transition active:scale-95 cursor-pointer"
+        className="crm-btn-secondary"
       >
         <X size={16} />
         <span>Cancel</span>
@@ -29,16 +30,25 @@ const LeadDrawerFooter = ({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-extrabold text-white shadow-md hover:bg-blue-700 disabled:opacity-50 transition active:scale-95 cursor-pointer"
+          className="crm-btn-primary"
         >
           {saving ? (
             <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div
+                style={{
+                  height: "16px",
+                  width: "16px",
+                  borderRadius: "50%",
+                  border: "2px solid #FFFFFF",
+                  borderTopColor: "transparent",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
               <span>Saving...</span>
             </>
           ) : (
             <>
-              <Save size={15} />
+              <Save size={16} />
               <span>Save Changes</span>
             </>
           )}
@@ -47,7 +57,8 @@ const LeadDrawerFooter = ({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl bg-slate-100 px-5 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
+          className="crm-btn-primary"
+          style={{ backgroundColor: "#64748B" }}
         >
           Done Viewing
         </button>

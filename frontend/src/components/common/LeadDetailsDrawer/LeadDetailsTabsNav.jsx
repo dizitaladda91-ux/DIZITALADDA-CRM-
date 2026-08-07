@@ -1,9 +1,10 @@
 import React from "react";
 import { User, GraduationCap, MessageSquareText } from "lucide-react";
+import "./LeadDetailsDrawer.css";
 
 /**
  * LeadDetailsTabsNav Component
- * 3-Tab horizontal navigation bar for switching between Personal, Academic, and Counsellor Notes & Feedback views.
+ * Shared 3-Tab navigation bar for Admin & Employee portals.
  */
 const LeadDetailsTabsNav = ({ activeTab, onTabChange }) => {
   const tabs = [
@@ -25,8 +26,8 @@ const LeadDetailsTabsNav = ({ activeTab, onTabChange }) => {
   ];
 
   return (
-    <div className="border-b border-slate-200 bg-white px-6 py-1">
-      <nav className="flex space-x-2 overflow-x-auto" aria-label="Lead Details Navigation">
+    <div className="crm-tabs-container">
+      <nav className="crm-tabs-nav">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -34,18 +35,9 @@ const LeadDetailsTabsNav = ({ activeTab, onTabChange }) => {
               key={tab.id}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`
-                flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-bold transition-all whitespace-nowrap cursor-pointer rounded-t-lg
-                ${
-                  isActive
-                    ? "border-blue-600 text-blue-600 bg-blue-50/60 font-extrabold shadow-2xs"
-                    : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }
-              `}
+              className={`crm-tab-button ${isActive ? "active" : ""}`}
             >
-              <span className={isActive ? "text-blue-600" : "text-slate-400"}>
-                {tab.icon}
-              </span>
+              {tab.icon}
               <span>{tab.label}</span>
             </button>
           );

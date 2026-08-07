@@ -14,6 +14,7 @@ import {
 import {
   findCampaignByIdRepository,
 } from "../repositories/campaignRepository.js";
+import { autoAssignLeadService } from "./leadRoutingService.js";
 
 /**
  * =====================================================
@@ -158,6 +159,11 @@ export const capturePublicLeadService = async (
      * Activity Log
      */
 
+    const routing = await autoAssignLeadService(
+      client,
+      lead
+    );
+
     await createLeadActivityRepository(
 
       client,
@@ -169,7 +175,9 @@ export const capturePublicLeadService = async (
         activity: "LEAD_CREATED",
 
         description:
-          "Lead captured from public source.",
+          routing.assigned
+            ? `Lead captured and auto-assigned to ${routing.employee.full_name}.`
+            : `Lead captured from public source. ${routing.reason || ""}`.trim(),
 
         performed_by: null,
 
@@ -205,7 +213,8 @@ export const capturePublicLeadService = async (
 
       type: "CREATED",
 
-      lead,
+        lead: routing.lead || lead,
+        routing,
 
     };
 

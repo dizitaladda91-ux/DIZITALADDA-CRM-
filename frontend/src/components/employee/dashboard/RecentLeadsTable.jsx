@@ -27,7 +27,7 @@ const RecentLeadsTable = ({ leads = [] }) => {
 
                 <button
     className="view-all-btn"
-    onClick={() => navigate("/employee/my-leads")}
+    onClick={() => navigate("/employee/leads")}
 >
     View All
 </button>

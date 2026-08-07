@@ -36,6 +36,7 @@ import {
 import {
   findEmployeeByUserIdRepository,
 } from "../repositories/employeeRepository.js";
+import { createRoutingAssignmentRepository } from "../repositories/leadRoutingRepository.js";
 
 /* =====================================================
  * Helpers
@@ -155,6 +156,20 @@ export const createEmployeeService = async (
                     created_by: currentUser.id,
                 }
             );
+
+        // Optional domain/course mapping supplied by the admin employee form.
+        // Each active mapping makes this counsellor eligible for auto-routing.
+        if (Array.isArray(employeeData.routing_assignments)) {
+            for (const routing of employeeData.routing_assignments) {
+                if (!routing?.domain_id) continue;
+                await createRoutingAssignmentRepository(client, {
+                    employeeId: employee.id,
+                    domainId: routing.domain_id,
+                    courseId: routing.course_id || null,
+                    autoAssign: routing.auto_assign !== false,
+                });
+            }
+        }
 
         // Audit Log
         safeAuditLog({

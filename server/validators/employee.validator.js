@@ -121,6 +121,14 @@ const createEmployeeSchema = Joi.object({
         .max(50)
         .optional(),
 
+    routing_assignments: Joi.array().items(
+        Joi.object({
+            domain_id: Joi.number().integer().positive().required(),
+            course_id: Joi.number().integer().positive().allow(null).optional(),
+            auto_assign: Joi.boolean().optional(),
+        })
+    ).optional(),
+
 }).options({
 
     abortEarly: false,

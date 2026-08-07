@@ -81,6 +81,10 @@ export const createPublicLeadRepository = async (
 
       external_lead_id,
 
+      domain,
+
+      interested_course,
+
       captured_at,
 
       status
@@ -91,7 +95,7 @@ export const createPublicLeadRepository = async (
 
       $1,$2,$3,$4,$5,$6,
       $7,$8,$9,$10,$11,
-      $12,$13,$14
+      $12,$13,$14,$15,$16
 
     )
 
@@ -124,6 +128,10 @@ export const createPublicLeadRepository = async (
     lead.utm_term,
 
     lead.external_lead_id,
+
+    lead.domain || null,
+
+    lead.interested_course || null,
 
     lead.captured_at,
 
@@ -196,11 +204,14 @@ export const updateExistingLeadRepository = async (
 
       external_lead_id = $8,
 
+      domain = $9,
+      interested_course = $10,
+
       captured_at = CURRENT_TIMESTAMP,
 
       updated_at = CURRENT_TIMESTAMP
 
-    WHERE id = $9
+    WHERE id = $11
 
     RETURNING *;
 
@@ -218,6 +229,10 @@ export const updateExistingLeadRepository = async (
     lead.utm_term,
 
     lead.external_lead_id,
+
+    lead.domain || null,
+
+    lead.interested_course || null,
 
     id
 
