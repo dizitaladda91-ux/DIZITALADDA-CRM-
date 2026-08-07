@@ -1,15 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { X, MessageSquareText, User, Clock, FileText, Calendar } from "lucide-react";
-
-import LeadSummaryCard from "./LeadSummaryCard";
-import LeadPersonalInfoCard from "./LeadPersonalInfoCard";
-import LeadAcademicInfoCard from "./LeadAcademicInfoCard";
-import LeadStatusPriorityCard from "./LeadStatusPriorityCard";
-import LeadFeedbackFormCard from "./LeadFeedbackFormCard";
-import LeadFeedbackHistoryTimeline from "./LeadFeedbackHistoryTimeline";
+import LeadSummaryHeader from "./LeadSummaryHeader";
+import LeadDetailsTabsNav from "./LeadDetailsTabsNav";
+import PersonalInformationTab from "./PersonalInformationTab";
+import AcademicInformationTab from "./AcademicInformationTab";
+import CounsellorNotesTab from "./CounsellorNotesTab";
 import LeadDrawerFooter from "./LeadDrawerFooter";
 
-import { getLeadById, updateLeadStatus } from "../../../services/leadService";
+import { getLeadById } from "../../../services/leadService";
 import {
   addLeadFeedback,
   getLeadFeedbackHistory,
@@ -17,7 +14,7 @@ import {
 
 /**
  * Shared LeadDetailsDrawer Component
- * Redesigned SaaS CRM lead panel with categorized cards, vertical timeline, role-based controls, and sticky footer.
+ * Redesigned 3-Tab SaaS CRM lead panel with compact summary header, dynamic academic level switcher, counsellor feedback timeline, and sticky footer.
  */
 const LeadDetailsDrawer = ({
   open = false,
@@ -28,20 +25,31 @@ const LeadDetailsDrawer = ({
 }) => {
   const isAdmin = role === "admin";
   const isCounsellor = role === "counsellor";
+  const isEditable = isCounsellor; // Counsellors have full edit capabilities; Admin views complete audit trail
 
   const [loading, setLoading] = useState(false);
   const [leadDetails, setLeadDetails] = useState(null);
   
-  // Active tab state
-  const [activeTab, setActiveTab] = useState(isCounsellor ? "feedback" : "overview");
+  // 3-Tab State: "personal" | "academic" | "counselling"
+  const [activeTab, setActiveTab] = useState("personal");
+
+  // Preserved Form State across all 3 tabs
+  const [personalData, setPersonalData] = useState({});
+  const [academicData, setAcademicData] = useState({
+    education_type: "school",
+    class_grade: "12th",
+    stream: "Science",
+    board: "CBSE",
+    year_of_passing: "2026",
+    interested_course: "BCA",
+  });
 
   // Feedback & History State
   const [feedbackHistory, setFeedbackHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [submittingFeedback, setSubmittingFeedback] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Dynamic Form State
+  // Dynamic Status & Remarks State
   const [selectedStatus, setSelectedStatus] = useState("CONTACTED");
   const [feedbackFields, setFeedbackFields] = useState({});
   const [remarks, setRemarks] = useState("");
@@ -56,19 +64,6 @@ const LeadDetailsDrawer = ({
     { value: "REJECTED", label: "Rejected" },
   ];
 
-  const tabs = isCounsellor
-    ? [
-        { id: "feedback", label: "Feedback & Status Update", icon: <MessageSquareText size={15} /> },
-        { id: "overview", label: "Full Details & Cards", icon: <User size={15} /> },
-      ]
-    : [
-        { id: "overview", label: "Overview", icon: <User size={15} /> },
-        { id: "feedback", label: "Feedback History", icon: <MessageSquareText size={15} /> },
-        { id: "timeline", label: "System Logs", icon: <Clock size={15} /> },
-        { id: "notes", label: "Notes", icon: <FileText size={15} /> },
-        { id: "followups", label: "Follow-ups", icon: <Calendar size={15} /> },
-      ];
-
   const loadLeadData = useCallback(async () => {
     if (!lead?.id) return;
 
@@ -77,6 +72,23 @@ const LeadDetailsDrawer = ({
       const response = await getLeadById(lead.id);
       const leadData = response.data || response;
       setLeadDetails(leadData);
+
+      // Populate personal info form state
+      setPersonalData({
+        full_name: leadData.full_name || "",
+        mobile: leadData.mobile || "",
+        alternate_mobile: leadData.alternate_mobile || "",
+        email: leadData.email || "",
+        city: leadData.city || "",
+        state: leadData.state || "Uttar Pradesh",
+      });
+
+      // Populate academic info form state
+      setAcademicData((prev) => ({
+        ...prev,
+        interested_course: leadData.interested_course || leadData.course_name || "BCA",
+        preferred_centre: leadData.preferred_centre || "",
+      }));
 
       if (leadData.status) {
         setSelectedStatus(leadData.status.toUpperCase());
@@ -93,7 +105,20 @@ const LeadDetailsDrawer = ({
     try {
       setHistoryLoading(true);
       const res = await getLeadFeedbackHistory(lead.id);
-      setFeedbackHistory(res.data || res || []);
+      const historyList = res.data || res || [];
+      setFeedbackHistory(historyList);
+
+      // If history has recorded academic fields, hydrate academicData form state
+      if (historyList.length > 0) {
+        const latestFeedback = historyList[0];
+        const fields = latestFeedback.feedback_fields || {};
+        if (fields.education_type || fields.school_name || fields.college_name) {
+          setAcademicData((prev) => ({
+            ...prev,
+            ...fields,
+          }));
+        }
+      }
     } catch (err) {
       console.error("Error fetching feedback history:", err);
     } finally {
@@ -103,58 +128,39 @@ const LeadDetailsDrawer = ({
 
   useEffect(() => {
     if (open && lead?.id) {
-      setActiveTab(isCounsellor ? "feedback" : "overview");
+      setActiveTab("personal");
       loadLeadData();
       loadFeedbackHistory();
     }
-  }, [open, lead?.id, isCounsellor, loadLeadData, loadFeedbackHistory]);
+  }, [open, lead?.id, loadLeadData, loadFeedbackHistory]);
 
-  const handleDirectStatusChange = async (newStatus) => {
-    if (!lead?.id || !newStatus || newStatus === leadDetails?.status) return;
-
-    try {
-      setUpdatingStatus(true);
-      await updateLeadStatus(lead.id, { status: newStatus });
-
-      setSelectedStatus(newStatus);
-      await loadLeadData();
-
-      if (typeof onStatusUpdated === "function") {
-        onStatusUpdated();
-      }
-
-      alert(`Lead status updated to ${newStatus} successfully!`);
-    } catch (error) {
-      console.error("Failed to update lead status:", error);
-      alert(error?.response?.data?.message || "Failed to update lead status");
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
-  const handleFieldChange = (field, value) => {
+  const handleFeedbackFieldChange = (field, value) => {
     setFeedbackFields((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleFeedbackSubmit = async (e) => {
-    if (e) e.preventDefault();
+  const handleSaveChanges = async () => {
     if (!lead?.id) return;
 
     try {
-      setSubmittingFeedback(true);
+      setSaving(true);
       const payload = {
         status: selectedStatus,
-        feedback_fields: feedbackFields,
+        personal_info: personalData,
+        academic_info: academicData,
+        feedback_fields: {
+          ...academicData,
+          ...feedbackFields,
+        },
         remarks: remarks.trim(),
       };
 
       await addLeadFeedback(lead.id, payload);
 
-      setFeedbackFields({});
       setRemarks("");
+      setFeedbackFields({});
 
       await loadFeedbackHistory();
       await loadLeadData();
@@ -163,12 +169,12 @@ const LeadDetailsDrawer = ({
         onStatusUpdated();
       }
 
-      alert("Feedback entry saved & status/priority updated successfully!");
+      alert("Lead profile, status & feedback updated successfully!");
     } catch (error) {
-      console.error("Failed to submit feedback:", error);
-      alert(error?.response?.data?.message || "Failed to save feedback");
+      console.error("Failed to save changes:", error);
+      alert(error?.response?.data?.message || "Failed to save lead updates");
     } finally {
-      setSubmittingFeedback(false);
+      setSaving(false);
     }
   };
 
@@ -195,159 +201,72 @@ const LeadDetailsDrawer = ({
         onClick={onClose}
       />
 
-      {/* Responsive Drawer Container */}
+      {/* Responsive Drawer Container (~750px–840px on Desktop, 100% on Mobile) */}
       <aside
         className="
-          fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-slate-50 shadow-2xl transition-all duration-300 sm:w-[540px] lg:w-[600px] xl:w-[660px]
+          fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-slate-50 shadow-2xl transition-all duration-300 sm:w-[680px] lg:w-[780px] xl:w-[840px]
         "
       >
-        {/* ================= DRAWER HEADER ================= */}
-        <div className="sticky top-0 z-20 border-b border-slate-200 bg-white px-6 py-4 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                Lead Details
-              </h2>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                View and manage complete lead information
-              </p>
-            </div>
+        {/* ================= COMPACT TOP HEADER ================= */}
+        <LeadSummaryHeader
+          lead={currentLead}
+          role={role}
+          onClose={onClose}
+        />
 
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close drawer"
-              className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
+        {/* ================= 3-TAB HORIZONTAL NAV BAR ================= */}
+        <LeadDetailsTabsNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        {/* ================= TAB BAR ================= */}
-        <div className="border-b border-slate-200 bg-white px-4">
-          <div className="flex space-x-1 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer
-                  ${
-                    activeTab === tab.id
-                      ? "border-blue-600 text-blue-600 bg-blue-50/50 font-extrabold"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-                  }
-                `}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ================= INDEPENDENT SCROLLING CONTENT AREA ================= */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* LEAD SUMMARY CARD (TOP) */}
-          <LeadSummaryCard lead={currentLead} />
-
-          {/* TAB 1: OVERVIEW & CATEGORIZED CARDS */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              {/* Personal Information Card */}
-              <LeadPersonalInfoCard lead={currentLead} />
-
-              {/* Lead & Academic Information Card */}
-              <LeadAcademicInfoCard lead={currentLead} />
-
-              {/* Status & Priority Management Card */}
-              <LeadStatusPriorityCard
-                lead={currentLead}
-                isCounsellor={isCounsellor}
-                selectedStatus={selectedStatus}
-                onStatusChange={handleDirectStatusChange}
-                updatingStatus={updatingStatus}
-                statusOptions={STATUS_OPTIONS}
-              />
-            </div>
+        {/* ================= INDEPENDENT SCROLLING TAB CONTENT AREA ================= */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* TAB 1: PERSONAL INFORMATION */}
+          {activeTab === "personal" && (
+            <PersonalInformationTab
+              formData={personalData}
+              onFormChange={setPersonalData}
+              lead={currentLead}
+              isEditable={isEditable}
+              onQuickAction={setActiveTab}
+            />
           )}
 
-          {/* TAB 2: FEEDBACK & INTERACTION HISTORY */}
-          {activeTab === "feedback" && (
-            <div className="space-y-6">
-              {/* Dynamic Feedback Form (Counsellor View Only) */}
-              {isCounsellor && (
-                <LeadFeedbackFormCard
-                  selectedStatus={selectedStatus}
-                  onStatusSelect={(st) => {
-                    setSelectedStatus(st);
-                    setFeedbackFields({});
-                  }}
-                  feedbackFields={feedbackFields}
-                  onFieldChange={handleFieldChange}
-                  remarks={remarks}
-                  onRemarksChange={setRemarks}
-                  onSubmit={handleFeedbackSubmit}
-                  submitting={submittingFeedback}
-                  statusOptions={STATUS_OPTIONS}
-                />
-              )}
-
-              {/* Categorized Info Cards (Also visible in Feedback Tab for quick context) */}
-              {isCounsellor && (
-                <>
-                  <LeadPersonalInfoCard lead={currentLead} />
-                  <LeadAcademicInfoCard lead={currentLead} />
-                </>
-              )}
-
-              {/* Interaction History Timeline */}
-              <LeadFeedbackHistoryTimeline
-                feedbackHistory={feedbackHistory}
-                loading={historyLoading}
-                isAdmin={isAdmin}
-              />
-            </div>
+          {/* TAB 2: ACADEMIC INFORMATION */}
+          {activeTab === "academic" && (
+            <AcademicInformationTab
+              formData={academicData}
+              onFormChange={setAcademicData}
+              lead={currentLead}
+              isEditable={isEditable}
+            />
           )}
 
-          {/* ADMIN EXTRA TABS */}
-          {isAdmin && activeTab === "timeline" && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-slate-500 space-y-2">
-              <Clock className="mx-auto text-blue-600" size={32} />
-              <h4 className="text-sm font-bold text-slate-800">System Activity Logs</h4>
-              <p className="text-xs text-slate-500">Automated audit logging of lead events.</p>
-            </div>
-          )}
-
-          {isAdmin && activeTab === "notes" && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-slate-500 space-y-2">
-              <FileText className="mx-auto text-blue-600" size={32} />
-              <h4 className="text-sm font-bold text-slate-800">Lead Notes Archive</h4>
-              <p className="text-xs text-slate-500">Notes captured across all counsellor interactions.</p>
-            </div>
-          )}
-
-          {isAdmin && activeTab === "followups" && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-slate-500 space-y-2">
-              <Calendar className="mx-auto text-blue-600" size={32} />
-              <h4 className="text-sm font-bold text-slate-800">Next Scheduled Follow-up</h4>
-              <p className="text-sm font-extrabold text-slate-900">
-                {currentLead?.next_followup
-                  ? new Date(currentLead.next_followup).toLocaleString("en-IN", { dateStyle: "full", timeStyle: "short" })
-                  : "No pending follow-up scheduled"}
-              </p>
-            </div>
+          {/* TAB 3: COUNSELLOR NOTES & FEEDBACK */}
+          {activeTab === "counselling" && (
+            <CounsellorNotesTab
+              selectedStatus={selectedStatus}
+              onStatusSelect={setSelectedStatus}
+              feedbackFields={feedbackFields}
+              onFieldChange={handleFeedbackFieldChange}
+              remarks={remarks}
+              onRemarksChange={setRemarks}
+              feedbackHistory={feedbackHistory}
+              historyLoading={historyLoading}
+              lead={currentLead}
+              isEditable={isEditable}
+              statusOptions={STATUS_OPTIONS}
+            />
           )}
         </div>
 
         {/* ================= STICKY FOOTER ACTIONS ================= */}
         <LeadDrawerFooter
           onCancel={onClose}
-          onSave={handleFeedbackSubmit}
-          saving={submittingFeedback}
-          isCounsellor={isCounsellor}
+          onSave={handleSaveChanges}
+          saving={saving}
+          isEditable={isEditable}
         />
       </aside>
     </>

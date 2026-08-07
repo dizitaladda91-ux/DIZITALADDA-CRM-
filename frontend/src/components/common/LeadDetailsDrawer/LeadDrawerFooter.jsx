@@ -1,15 +1,15 @@
 import React from "react";
-import { Send, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 
 /**
  * LeadDrawerFooter Component
- * Sticky action footer containing left-aligned Cancel button and right-aligned Save Changes primary button.
+ * Sticky action footer containing left Cancel button and right Save Changes primary button.
  */
 const LeadDrawerFooter = ({
   onCancel,
   onSave,
   saving = false,
-  isCounsellor = true,
+  isEditable = true,
 }) => {
   return (
     <div className="sticky bottom-0 z-30 flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-lg">
@@ -17,14 +17,14 @@ const LeadDrawerFooter = ({
       <button
         type="button"
         onClick={onCancel}
-        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-extrabold text-red-700 hover:bg-red-100 hover:border-red-300 transition active:scale-95 cursor-pointer"
+        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-xs font-extrabold text-red-600 hover:bg-red-50 hover:border-red-300 transition active:scale-95 cursor-pointer"
       >
         <X size={16} />
         <span>Cancel</span>
       </button>
 
-      {/* RIGHT: Save Changes Primary Button (Enabled for Counsellor or when saving) */}
-      {isCounsellor ? (
+      {/* RIGHT: Save Changes Primary Button */}
+      {isEditable ? (
         <button
           type="button"
           onClick={onSave}
@@ -38,7 +38,7 @@ const LeadDrawerFooter = ({
             </>
           ) : (
             <>
-              <Send size={15} />
+              <Save size={15} />
               <span>Save Changes</span>
             </>
           )}
@@ -47,7 +47,7 @@ const LeadDrawerFooter = ({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl bg-slate-100 px-5 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-200 transition"
+          className="rounded-xl bg-slate-100 px-5 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
         >
           Done Viewing
         </button>
