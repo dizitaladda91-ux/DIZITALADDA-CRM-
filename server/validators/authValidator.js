@@ -3,6 +3,22 @@ import { body } from "express-validator";
 /**
  * =====================================================
  * Register Validator
+ *
+ * SECURITY FIX (see audit notes) - CRITICAL:
+ * This previously required a client-supplied `role`
+ * field and explicitly whitelisted "ADMIN" as a valid
+ * value for this fully public, unauthenticated
+ * registration endpoint. Combined with the corresponding
+ * bug in authService.js's registerUserService (also
+ * fixed - see that file), this allowed anyone on the
+ * internet to self-register a working Admin account.
+ *
+ * The `role` field is removed entirely here, not just
+ * left unvalidated - authService.js now force-sets the
+ * role server-side regardless of what's in the request
+ * body, so accepting this field here would be both
+ * pointless and misleading (it would suggest to a future
+ * developer that role is a legitimate, honored input).
  * =====================================================
  */
 
@@ -48,16 +64,6 @@ export const registerValidator = [
     .withMessage(
       "Password must contain at least one special character."
     ),
-
-  body("role")
-    .notEmpty()
-    .withMessage("Role is required.")
-    .isIn([
-      "ADMIN",
-      "MANAGER",
-      "COUNSELLOR",
-    ])
-    .withMessage("Invalid role.")
 
 ];
 
@@ -136,4 +142,3 @@ export const resetPasswordValidator = [
     )
 
 ];
-

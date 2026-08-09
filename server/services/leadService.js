@@ -2,6 +2,8 @@ import pool from "../config/db.js";
 import ApiError from "../utils/ApiError.js";
 import auditLogger from "../utils/auditLogger.js";
 
+import ROLES from "../constants/roles.js";
+
 import {
   getNextLeadCodeRepository,
   createLeadRepository,
@@ -23,6 +25,7 @@ import {
 
 import {
   findEmployeeByIdRepository,
+  findEmployeeByUserIdRepository,
 } from "../repositories/employeeRepository.js";
 
 import {
@@ -32,7 +35,6 @@ import {
 import {
   addLeadNoteRepository,
   getLeadNotesRepository,
-  addLeadTimelineRepository,
   getLeadTimelineRepository,
 } from "../repositories/leadRepository.js";
 
@@ -41,6 +43,74 @@ import {
 } from "../services/leadTimeline.service.js";
 
 import TIMELINE_ACTIVITY from "../constants/timelineActivity.js";
+
+/**
+ * =====================================================
+ * Ownership Guard Helpers
+ *
+ * CONFIRMED (via employeeRepository.js): `employees` has
+ * its own primary key, separate from `users.id`, bridged
+ * by `employees.user_id`. `leads.assigned_to` stores
+ * `employees.id`, NOT `users.id`. `currentUser.id`
+ * (attached by authMiddleware) is a `users.id`.
+ *
+ * These two IDs must never be compared directly - doing
+ * so was a bug in an earlier version of this fix. Every
+ * Counsellor-scoped check must first resolve the current
+ * user's employee record via findEmployeeByUserIdRepository
+ * before comparing against assigned_to.
+ * =====================================================
+ */
+
+const resolveEmployeeIdForCounsellor = async (currentUser) => {
+
+  if (currentUser.role !== ROLES.COUNSELLOR) {
+
+    return null;
+
+  }
+
+  const employee =
+    await findEmployeeByUserIdRepository(currentUser.id);
+
+  if (!employee) {
+
+    // A Counsellor-role user account with no linked
+    // employee record is a data-integrity problem, not
+    // a normal "no leads yet" case - fail closed and
+    // loudly rather than silently returning an empty list.
+    throw new ApiError(
+      403,
+      "No employee profile is linked to this account. Contact an administrator."
+    );
+
+  }
+
+  return employee.id;
+
+};
+
+const assertLeadOwnership = async (lead, currentUser) => {
+
+  if (currentUser.role !== ROLES.COUNSELLOR) {
+
+    return;
+
+  }
+
+  const employeeId =
+    await resolveEmployeeIdForCounsellor(currentUser);
+
+  if (String(lead.assigned_to) !== String(employeeId)) {
+
+    throw new ApiError(
+      403,
+      "You do not have permission to access this lead."
+    );
+
+  }
+
+};
 
 /**
  * =====================================================
@@ -120,14 +190,13 @@ export const createLeadService = async (
         }
       );
 
-       await addTimelineEventService({
-  leadId: lead.id,
-  employeeId: lead.assigned_to || null,
-  activityType: TIMELINE_ACTIVITY.LEAD_CREATED,
-  title: "Lead Created",
-  description: `Lead ${lead.full_name} created successfully.`,
-});
-
+    await addTimelineEventService({
+      leadId: lead.id,
+      employeeId: lead.assigned_to || null,
+      activityType: TIMELINE_ACTIVITY.LEAD_CREATED,
+      title: "Lead Created",
+      description: `Lead ${lead.full_name} created successfully.`,
+    });
 
     auditLogger({
 
@@ -163,21 +232,39 @@ export const createLeadService = async (
 
   }
 
- 
 };
 
 /**
  * =====================================================
  * Get All Leads
+ *
+ * SECURITY: When the requesting user is a Counsellor,
+ * the assigned_to filter is force-set to their own ID,
+ * overriding anything the client sent in the query
+ * string. This is intentional - a Counsellor must never
+ * be able to list another Counsellor's leads by
+ * tampering with the query params.
  * =====================================================
  */
 
 export const getAllLeadsService = async (
-  filters
+  filters,
+  currentUser
 ) => {
 
+  const scopedFilters = { ...filters };
+
+  const employeeId =
+    await resolveEmployeeIdForCounsellor(currentUser);
+
+  if (employeeId !== null) {
+
+    scopedFilters.assigned_to = employeeId;
+
+  }
+
   return await getLeadsRepository(
-    filters
+    scopedFilters
   );
 
 };
@@ -185,11 +272,16 @@ export const getAllLeadsService = async (
 /**
  * =====================================================
  * Get Lead By ID
+ *
+ * SECURITY: throws 403 if a Counsellor requests a lead
+ * not assigned to them. See assertLeadOwnership above
+ * for the caveat on ID-space assumptions.
  * =====================================================
  */
 
 export const getLeadByIdService = async (
-  id
+  id,
+  currentUser
 ) => {
 
   const lead =
@@ -203,6 +295,8 @@ export const getLeadByIdService = async (
     );
 
   }
+
+  await assertLeadOwnership(lead, currentUser);
 
   return lead;
 
@@ -477,10 +571,18 @@ export const restoreLeadService = async (
 /**
  * =====================================================
  * Lead Statistics
+ *
+ * NOTE: getLeadStatisticsRepository is currently global
+ * (no scoping parameter). currentUser is accepted here
+ * so per-counsellor statistics can be added later, but
+ * today this still returns company-wide numbers to
+ * anyone who can reach the route - the route itself
+ * needs a role check (see leadRoutes.js audit notes)
+ * until per-user stats queries are built.
  * =====================================================
  */
 
-export const getLeadStatisticsService = async () => {
+export const getLeadStatisticsService = async (currentUser) => {
 
   return await getLeadStatisticsRepository();
 
@@ -628,36 +730,36 @@ export const updateLeadStatusService = async (
     }
 
     if (
-  status === "REJECTED" &&
-  (!feedback || !feedback.trim())
-) {
-  throw new ApiError(
-    400,
-    "Feedback is required when rejecting a lead."
-  );
-}
+      status === "REJECTED" &&
+      (!feedback || !feedback.trim())
+    ) {
+      throw new ApiError(
+        400,
+        "Feedback is required when rejecting a lead."
+      );
+    }
 
     const updatedLead =
-  await updateLeadStatusRepository(
-    client,
-    leadId,
-    status,
-    feedback,
-    currentUser.id
-  );
+      await updateLeadStatusRepository(
+        client,
+        leadId,
+        status,
+        feedback,
+        currentUser.id
+      );
 
-      await addTimelineEventService({
-  leadId,
-  employeeId: lead.assigned_to,
-  activityType: TIMELINE_ACTIVITY.STATUS_CHANGED,
-  title: "Lead Status Updated",
-  description:
-  status === "REJECTED"
-    ? `Lead rejected. Reason: ${feedback}`
-    : `Status changed from ${lead.status} to ${status}.`,
-  oldValue: lead.status,
-  newValue: status,
-});
+    await addTimelineEventService({
+      leadId,
+      employeeId: lead.assigned_to,
+      activityType: TIMELINE_ACTIVITY.STATUS_CHANGED,
+      title: "Lead Status Updated",
+      description:
+        status === "REJECTED"
+          ? `Lead rejected. Reason: ${feedback}`
+          : `Status changed from ${lead.status} to ${status}.`,
+      oldValue: lead.status,
+      newValue: status,
+    });
 
     auditLogger({
 
@@ -740,12 +842,12 @@ export const addLeadNoteService = async (
       );
 
     await addTimelineEventService({
-  leadId,
-  employeeId: currentUser.id,
-  activityType: TIMELINE_ACTIVITY.NOTE_ADDED,
-  title: "Lead Note Added",
-  description: note,
-});
+      leadId,
+      employeeId: currentUser.id,
+      activityType: TIMELINE_ACTIVITY.NOTE_ADDED,
+      title: "Lead Note Added",
+      description: note,
+    });
 
     auditLogger({
 
@@ -786,11 +888,15 @@ export const addLeadNoteService = async (
 /**
  * =====================================================
  * Get Lead Notes
+ *
+ * SECURITY: ownership-checked for Counsellor role,
+ * same as getLeadByIdService.
  * =====================================================
  */
 
 export const getLeadNotesService = async (
-  leadId
+  leadId,
+  currentUser
 ) => {
 
   const lead =
@@ -805,6 +911,8 @@ export const getLeadNotesService = async (
 
   }
 
+  await assertLeadOwnership(lead, currentUser);
+
   return await getLeadNotesRepository(
     leadId
   );
@@ -814,11 +922,15 @@ export const getLeadNotesService = async (
 /**
  * =====================================================
  * Get Lead Timeline
+ *
+ * SECURITY: ownership-checked for Counsellor role,
+ * same as getLeadByIdService.
  * =====================================================
  */
 
 export const getLeadTimelineService = async (
-  leadId
+  leadId,
+  currentUser
 ) => {
 
   const lead =
@@ -835,6 +947,8 @@ export const getLeadTimelineService = async (
 
   }
 
+  await assertLeadOwnership(lead, currentUser);
+
   return await getLeadTimelineRepository(
     leadId
   );
@@ -843,11 +957,20 @@ export const getLeadTimelineService = async (
 
 // =====================================================
 // Bulk Assign Leads Service
+//
+// NOTE: req is now accepted and its requestId/ip are
+// threaded into the audit log, matching every other
+// action in this file. Previously this call hardcoded
+// requestId: null, ip: null, which meant bulk
+// assignment - the single most consequential action
+// available, since it touches many leads at once - had
+// the weakest audit trail of any write operation.
 // =====================================================
 
 export const assignBulkLeadsService = async (
   payload,
-  currentUser
+  currentUser,
+  req
 ) => {
 
   const client = await pool.connect();
@@ -927,8 +1050,8 @@ export const assignBulkLeadsService = async (
       userId: currentUser.id,
       role: currentUser.role,
       entityId: null,
-      requestId: null,
-      ip: null,
+      requestId: req?.requestId || null,
+      ip: req?.ip || null,
     });
 
     await client.query("COMMIT");
@@ -948,4 +1071,3 @@ export const assignBulkLeadsService = async (
   }
 
 };
-

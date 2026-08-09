@@ -10,6 +10,10 @@ import {
   findUserByIdRepository,
 } from "../repositories/authRepository.js";
 
+import {
+  findEmployeeByUserIdRepository,
+} from "../repositories/employeeRepository.js";
+
 /**
  * =====================================================
  * Authentication Middleware
@@ -94,6 +98,53 @@ const authMiddleware = async (
         new ApiError(
           HTTP_STATUS.UNAUTHORIZED,
           "User not found."
+        )
+      );
+
+    }
+
+    /**
+     * ----------------------------------------
+     * Check Account Is Active
+     * (Prevents deactivated users from
+     * continuing to use an already-issued,
+     * still-unexpired access token)
+     * ----------------------------------------
+     */
+
+    if (!user.is_active) {
+
+      return next(
+        new ApiError(
+          HTTP_STATUS.UNAUTHORIZED,
+          "Your account has been deactivated. Please contact an administrator."
+        )
+      );
+
+    }
+
+    /**
+     * ----------------------------------------
+     * Check Account Is Not Deleted
+     * (findUserByIdRepository already filters
+     * is_deleted = FALSE at the query level,
+     * so this branch should be unreachable in
+     * normal operation. It stays here as an
+     * explicit, self-documenting guard so the
+     * security boundary is visible in this file
+     * without having to trace into the
+     * repository layer, and so behavior stays
+     * correct even if the repository query is
+     * ever changed to drop that filter.)
+     * ----------------------------------------
+     */
+
+    if (user.is_deleted) {
+
+      return next(
+        new ApiError(
+          HTTP_STATUS.UNAUTHORIZED,
+          "This account no longer exists."
         )
       );
 

@@ -10,7 +10,7 @@ import {
   deleteFollowup,
   restoreFollowup,
   getFollowupStatistics,
-  getLeadTimeline, 
+  getLeadTimeline,
   bulkCompleteFollowups,
   bulkDeleteFollowups,
   bulkRestoreFollowups,
@@ -20,6 +20,26 @@ import {
 import authMiddleware from "../middleware/authMiddleware.js";
 
 import roleMiddleware from "../middleware/roleMiddleware.js";
+
+/**
+ * =====================================================
+ * BUG FIX (see audit notes):
+ * All "/bulk/*" routes (and "DELETE /bulk") were
+ * previously registered AFTER their singular "/:id/..."
+ * counterparts. Express matches by registration order,
+ * and ":id" happily binds to the literal string "bulk" -
+ * so PATCH /bulk/complete matched "/:id/complete" first
+ * (id="bulk"), and same for /bulk/restore and DELETE
+ * /bulk. Three of the four bulk operations were
+ * effectively dead code in production. Fixed by moving
+ * every "/bulk/*" route above any "/:id" route, matching
+ * the "static routes before /:id" pattern already used
+ * correctly for "/statistics" and "/timeline/:leadId" in
+ * this same file - that pattern just needed to be
+ * extended to cover two-segment paths too, not only
+ * single-segment ones.
+ * =====================================================
+ */
 
 const router = Router();
 
@@ -47,6 +67,46 @@ router.get(
   authMiddleware,
   getLeadTimeline
 );
+
+/**
+ * -----------------------------------------------------
+ * Bulk routes - must stay above any "/:id" route below.
+ * -----------------------------------------------------
+ */
+
+router.patch(
+  "/bulk/complete",
+  authMiddleware,
+  roleMiddleware("ADMIN", "COUNSELLOR"),
+  bulkCompleteFollowups
+);
+
+router.patch(
+  "/bulk/restore",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  bulkRestoreFollowups
+);
+
+router.patch(
+  "/bulk/assign",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  bulkAssignFollowups
+);
+
+router.delete(
+  "/bulk",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  bulkDeleteFollowups
+);
+
+/**
+ * -----------------------------------------------------
+ * Single-followup, ID-based routes.
+ * -----------------------------------------------------
+ */
 
 router.get(
   "/:id",
@@ -87,34 +147,6 @@ router.patch(
   authMiddleware,
   roleMiddleware("ADMIN"),
   restoreFollowup
-);
-
-router.patch(
-  "/bulk/complete",
-  authMiddleware,
-  roleMiddleware("ADMIN", "COUNSELLOR"),
-  bulkCompleteFollowups
-);
-
-router.patch(
-  "/bulk/restore",
-  authMiddleware,
-  roleMiddleware("ADMIN"),
-  bulkRestoreFollowups
-);
-
-router.patch(
-  "/bulk/assign",
-  authMiddleware,
-  roleMiddleware("ADMIN"),
-  bulkAssignFollowups
-);
-
-router.delete(
-  "/bulk",
-  authMiddleware,
-  roleMiddleware("ADMIN"),
-  bulkDeleteFollowups
 );
 
 export default router;

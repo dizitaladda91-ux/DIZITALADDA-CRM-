@@ -49,13 +49,17 @@ export const createLead = asyncHandler(async (req, res) => {
 /**
  * =====================================================
  * Get All Leads
+ * NOTE: req.user is now passed through so the service
+ * can force assigned_to scoping for Counsellor accounts.
+ * Do not remove this without re-checking leadService.js
  * =====================================================
  */
 
 export const getAllLeads = asyncHandler(async (req, res) => {
 
   const leads = await getAllLeadsService(
-    req.query
+    req.query,
+    req.user
   );
 
   return res.status(200).json(
@@ -71,13 +75,16 @@ export const getAllLeads = asyncHandler(async (req, res) => {
 /**
  * =====================================================
  * Get Lead By ID
+ * NOTE: req.user is now passed through so the service
+ * can reject access to leads not owned by a Counsellor.
  * =====================================================
  */
 
 export const getLeadById = asyncHandler(async (req, res) => {
 
   const lead = await getLeadByIdService(
-    req.params.id
+    req.params.id,
+    req.user
   );
 
   return res.status(200).json(
@@ -197,13 +204,20 @@ export const restoreLead = asyncHandler(async (req, res) => {
 /**
  * =====================================================
  * Lead Statistics
+ * NOTE: req.user now passed through. This route is
+ * currently unrestricted by role in leadRoutes.js -
+ * see audit notes. Scoping added defensively so a
+ * Counsellor calling this endpoint gets their own
+ * numbers, not company-wide totals, until the route
+ * itself is reviewed for whether it should be
+ * Admin-only.
  * =====================================================
  */
 
 export const getLeadStatistics = asyncHandler(async (req, res) => {
 
   const statistics =
-    await getLeadStatisticsService();
+    await getLeadStatisticsService(req.user);
 
   return res.status(200).json(
 
@@ -332,6 +346,7 @@ export const addLeadNote = asyncHandler(async (req, res) => {
 /**
  * =====================================================
  * Get Lead Notes
+ * NOTE: req.user now passed through for ownership check.
  * =====================================================
  */
 
@@ -339,7 +354,9 @@ export const getLeadNotes = asyncHandler(async (req, res) => {
 
   const notes = await getLeadNotesService(
 
-    req.params.id
+    req.params.id,
+
+    req.user
 
   );
 
@@ -362,6 +379,7 @@ export const getLeadNotes = asyncHandler(async (req, res) => {
 /**
  * =====================================================
  * Get Lead Timeline
+ * NOTE: req.user now passed through for ownership check.
  * =====================================================
  */
 
@@ -369,7 +387,9 @@ export const getLeadTimeline = asyncHandler(async (req, res) => {
 
   const timeline = await getLeadTimelineService(
 
-    req.params.id
+    req.params.id,
+
+    req.user
 
   );
 

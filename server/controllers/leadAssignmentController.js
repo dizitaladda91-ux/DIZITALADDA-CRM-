@@ -1,147 +1,58 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
+import express from "express";
 import {
-  assignLeadService,
-} from "../services/leadAssignmentService.js";
+  assignLead,
+  reassignLead,
+  getLeadAssignmentHistory,
+} from "../controllers/leadAssignmentController.js";
 
+import verifyToken from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
 
-import {
-  getLeadAssignmentHistoryService,
-} from "../services/leadAssignmentService.js";
-
-import {
-  reassignLeadService,
-} from "../services/leadAssignmentService.js";
+import ROLES from "../constants/roles.js";
 
 /**
  * =====================================================
- * Assign Lead
- * POST /api/leads/:leadId/assign
+ * SECURITY FIX (see audit notes):
+ * This file previously had authMiddleware but NO role
+ * restriction on assign/reassign - a second, parallel
+ * path to the admin-only assignment action already
+ * correctly gated in leadRoutes.js (PATCH /:id/assign).
+ * Any authenticated Counsellor could assign/reassign any
+ * lead to any employee via this route. Added
+ * roleMiddleware(ROLES.ADMIN) to match the intended
+ * restriction.
+ *
+ * History (GET) is left open to any authenticated user
+ * for now, matching the read-permissiveness pattern used
+ * elsewhere (e.g. campaign GET routes) - but note this
+ * still has no per-lead ownership check, meaning a
+ * Counsellor can view assignment history for leads that
+ * are not theirs. Flagged separately; revisit alongside
+ * the broader "should reads be ownership-scoped by
+ * default" product decision.
  * =====================================================
  */
 
-export const assignLead = asyncHandler(
-  async (req, res) => {
+const router = express.Router();
 
-    const { leadId } = req.params;
-
-    const {
-      employee_id,
-      remarks,
-      note,
-      assignment_type,
-      priority,
-    } = req.body;
-
-    const assignedBy = req.user.id;
-
-    const data =
-      await assignLeadService(
-        leadId,
-        employee_id,
-        assignedBy,
-        remarks || note || null,
-        assignment_type || null,
-        priority || null
-      );
-
-    return res.status(200).json({
-
-      success: true,
-
-      message:
-        "Lead assigned successfully.",
-
-      data,
-
-    });
-
-  }
+router.put(
+  "/:leadId/assign",
+  verifyToken,
+  roleMiddleware(ROLES.ADMIN),
+  assignLead
 );
 
-export const getLeadAssignmentHistory =
-async (req, res, next) => {
+router.put(
+  "/:leadId/reassign",
+  verifyToken,
+  roleMiddleware(ROLES.ADMIN),
+  reassignLead
+);
 
-  try {
+router.get(
+  "/:leadId/history",
+  verifyToken,
+  getLeadAssignmentHistory
+);
 
-    const { leadId } = req.params;
-
-    const page =
-      Number(req.query.page) || 1;
-
-    const limit =
-      Number(req.query.limit) || 20;
-
-    const data =
-      await getLeadAssignmentHistoryService(
-        leadId,
-        page,
-        limit
-      );
-
-    return res.status(200).json({
-
-      success: true,
-
-      message:
-        "Assignment history fetched successfully.",
-
-      data,
-
-    });
-
-  } catch (error) {
-
-    next(error);
-
-  }
-
-};
-
-export const reassignLead = async (
-  req,
-  res,
-  next
-) => {
-
-  try {
-
-    const { leadId } = req.params;
-
-    const {
-      employee_id,
-      remarks,
-      note,
-      assignment_type,
-      priority,
-    } = req.body;
-
-    const data =
-      await reassignLeadService(
-        leadId,
-        employee_id,
-        req.user.id,
-        remarks || note || null,
-        assignment_type || null,
-        priority || null
-      );
-
-    return res.status(200).json({
-
-      success: true,
-
-      message:
-        "Lead reassigned successfully.",
-
-      data,
-
-    });
-
-  } catch (error) {
-
-    next(error);
-
-  }
-
-};
-
+export default router;
