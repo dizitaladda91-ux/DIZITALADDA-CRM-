@@ -16,7 +16,6 @@ import {
   bulkRestoreFollowupsService,
   bulkAssignFollowupsService,
 } from "../services/followupService.js";
-import { findEmployeeByUserIdRepository } from "../repositories/employeeRepository.js";
 
 
 /**
@@ -45,24 +44,30 @@ export const createFollowup = asyncHandler(
 /**
  * ============================================================================
  * Get All Follow-ups
+ *
+ * CLEANUP (see audit notes): counsellor-scoping was
+ * previously duplicated here AND (now) in
+ * getAllFollowupsService - two places enforcing the same
+ * rule, only one of which was actually active, matching a
+ * pattern found repeatedly elsewhere in this codebase.
+ * Simplified to delegate to the service, which now
+ * performs the same scoping using req.user.employee_id
+ * (see authMiddleware.js and followupService.js audit
+ * notes). Behavior is unchanged for Counsellors with a
+ * linked employee record; a Counsellor with no linked
+ * employee record now receives a 403 from the service
+ * instead of a graceful empty list - flagging this as a
+ * minor UX behavior change worth a quick product check,
+ * not a bug fix.
  * ============================================================================
  */
 export const getAllFollowups = asyncHandler(
   async (req, res) => {
 
-    const filters = { ...req.query };
-
-    if (req.user.role === "COUNSELLOR") {
-      const employee = await findEmployeeByUserIdRepository(req.user.id);
-      if (!employee) {
-        return res.status(200).json({ success: true, message: "Follow-ups fetched successfully.", data: { data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } } });
-      }
-      filters.employeeId = employee.id;
-    }
-
     const followups =
       await getAllFollowupsService(
-        filters
+        req.query,
+        req.user
       );
 
     res.status(200).json({
@@ -288,4 +293,3 @@ export const bulkAssignFollowups = asyncHandler(
 
   }
 );
-
