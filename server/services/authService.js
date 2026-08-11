@@ -47,30 +47,7 @@ import { verifyStoredPassword } from "../utils/passwordUtils.js";
 /**
  * =====================================================
  * Register User
- *
- * SECURITY FIX (see audit notes):
- * This previously spread the entire client-supplied
- * request body - including an attacker-controlled `role`
- * field - directly into the users INSERT. That allowed
- * unauthenticated self-registration as ADMIN via
- * POST /auth/register with { role: "ADMIN" } in the body.
- * Role is now force-set to ROLES.COUNSELLOR, ignoring
- * anything the client sends, regardless of what
- * registerValidator does or doesn't check.
- *
- * PRODUCT NOTE: given every other file reviewed this
- * session shows an admin-provisioned-only account model
- * (employeeService.js creates linked users+employees
- * rows together, with employee_code/department/etc.), a
- * self-registered user via this endpoint will have no
- * linked `employees` row and will hit "No employee
- * profile linked to this account" errors on most
- * counsellor-facing actions. Consider whether public
- * registration should be exposed at all, versus admin-
- * only provisioning via POST /api/employees. Left enabled
- * here with a safe role default rather than removed
- * outright, since that's a product decision, not a
- * security one - but flagging it strongly.
+ * (unchanged — see prior audit notes)
  * =====================================================
  */
 export const registerUserService = async (
@@ -144,15 +121,16 @@ export const registerUserService = async (
  * =====================================================
  * Login User
  *
- * SECURITY FIX (see audit notes):
- * Removed console.log statements that printed the
- * user's email, role, stored password hash, and the
- * plaintext password they typed on every login attempt.
- * This leaked credential material directly into server
- * logs - anyone with log access could harvest password
- * hashes and observe real plaintext passwords typed by
- * users. The plain-text-password upgrade logic itself is
- * unchanged and legitimate; only the logging was removed.
+ * BUG FIX (blocks the refresh flow entirely, cookies or
+ * not — found while wiring up cookie-based token storage):
+ * This generated a refresh token via generateRefreshToken()
+ * but never persisted it via createRefreshTokenRepository,
+ * unlike refreshTokenRotationService which does both. Any
+ * refresh attempt using a token issued at login would fail
+ * with "Invalid refresh token" because findRefreshTokenRepository
+ * would find no matching row. Now wrapped in a transaction
+ * that inserts the refresh token row, matching the pattern
+ * refreshTokenRotationService already uses (7-day expiry).
  * =====================================================
  */
 export const loginUserService = async (
@@ -188,24 +166,22 @@ export const loginUserService = async (
   }
 
   if (isPasswordPlainText) {
-    const client = await pool.connect();
+    const upgradeClient = await pool.connect();
     try {
-      await client.query("BEGIN");
+      await upgradeClient.query("BEGIN");
       const hashedPassword = await bcrypt.hash(password, 10);
       await updatePasswordRepository(
-        client,
+        upgradeClient,
         user.id,
         hashedPassword
       );
-      await client.query("COMMIT");
+      await upgradeClient.query("COMMIT");
     } catch (error) {
-      await client.query("ROLLBACK");
+      await upgradeClient.query("ROLLBACK");
       // Intentionally not logging error details here beyond
       // this point - see audit notes on removed debug logging.
-      // A structured logger.error(error) without credential
-      // material would be the right long-term replacement.
     } finally {
-      client.release();
+      upgradeClient.release();
     }
   }
 
@@ -214,6 +190,31 @@ export const loginUserService = async (
   const accessToken = generateAccessToken(user);
 
   const refreshToken = generateRefreshToken(user);
+
+  // NEW: persist the refresh token so a later refresh/logout can find it.
+  // 7-day expiry matches refreshTokenRotationService's existing convention.
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const expiresAt = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
+
+    await createRefreshTokenRepository(
+      client,
+      user.id,
+      refreshToken,
+      expiresAt
+    );
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 
   delete user.password;
 
@@ -379,33 +380,8 @@ export const changePasswordService = async (
 /**
  * =====================================================
  * Forgot Password
- *
- * SECURITY FIX (see audit notes) - CRITICAL:
- * This previously returned the raw, usable reset token
- * directly in the function's return value, which the
- * controller then sent straight back in the HTTP
- * response body. Since no email-delivery mechanism
- * exists anywhere in this codebase, that meant the token
- * was never actually sent to the account owner via a
- * side channel - it was handed directly to whoever called
- * this endpoint. Anyone who knew any user's email address
- * (including an admin's) could call this endpoint, receive
- * a valid reset token in the response, and immediately use
- * it to take over that account with no authentication at
- * all.
- *
- * The token is now only returned when NODE_ENV is not
- * "production", strictly for local development/testing
- * where no real email service is wired up yet. In any
- * other environment, only the generic message is returned.
- *
- * THIS IS A STOPGAP, NOT A FIX. The real fix is building
- * an actual email-delivery mechanism (flagged elsewhere in
- * this audit as a missing module entirely) and sending the
- * token there instead of returning it at all, in any
- * environment. Treat this as a P0 build item, not just a
- * P0 patch - do not rely on the NODE_ENV gate alone in a
- * real deployment.
+ * (unchanged — see prior audit notes; still a stopgap
+ * pending the email service)
  * =====================================================
  */
 export const forgotPasswordService = async (
@@ -420,11 +396,6 @@ export const forgotPasswordService = async (
 
     const user =
       await findUserByEmailRepository(email);
-
-    /**
-     * Security:
-     * Never reveal whether the email exists.
-     */
 
     if (!user) {
 
@@ -478,15 +449,11 @@ export const forgotPasswordService = async (
 
     await client.query("COMMIT");
 
-    // TODO (P0 - see audit notes): send `plainToken` via a
-    // real email-delivery service instead of ever returning
-    // it in an API response, in every environment.
     if (process.env.NODE_ENV !== "production") {
 
       return {
         message:
           "If an account exists, a password reset link has been sent.",
-        // Development-only - never returned in production.
         resetToken: plainToken,
         expiresAt,
       };
@@ -632,6 +599,9 @@ export const resetPasswordService = async (
 /**
  * =====================================================
  * Logout User
+ * (unchanged — still takes refreshToken + client;
+ * authController.js now passes the value read from the
+ * cookie instead of req.body)
  * =====================================================
  */
 export const logoutUserService = async (
@@ -671,6 +641,8 @@ export const logoutUserService = async (
 /**
  * =====================================================
  * Refresh Token Rotation
+ * (unchanged — already persists correctly; this is the
+ * pattern loginUserService was missing)
  * =====================================================
  */
 export const refreshTokenRotationService =
