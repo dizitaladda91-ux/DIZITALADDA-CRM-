@@ -15,33 +15,21 @@ import {
 import {
     getNextEmployeeCodeRepository,
     createEmployeeRepository,
-
     findEmployeeByIdRepository,
     findEmployeeByEmailRepository,
     findEmployeeByMobileRepository,
-
     updateEmployeeRepository,
     deleteEmployeeRepository,
     restoreEmployeeRepository,
-
     getEmployeesRepository,
     getEmployeeStatisticsRepository,
     getEmployeePerformanceRepository,
-
+    findEmployeeByUserIdRepository,
 } from "../repositories/employeeRepository.js";
 
-import {
-  getMyLeadsRepository,
-} from "../repositories/leadRepository.js";
-
-import {
-  findEmployeeByUserIdRepository,
-} from "../repositories/employeeRepository.js";
+import { getMyLeadsRepository } from "../repositories/leadRepository.js";
 import { createRoutingAssignmentRepository } from "../repositories/leadRoutingRepository.js";
-
-/* =====================================================
- * Helpers
- * ===================================================== */
+import { ensureEmployeeProfileForUser } from "./employeePortal.service.js";
 
 const generateEmployeeCode = (sequence) => {
     const prefix = process.env.EMPLOYEE_CODE_PREFIX || "EMP";
