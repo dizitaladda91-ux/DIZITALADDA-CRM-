@@ -7,6 +7,7 @@ import {
 
 import {
   loginUser,
+  logoutUser, // NEW — assumed export; see note below if this doesn't exist yet
   getProfile,
   updateProfile as updateProfileRequest,
 } from "../services/authService";
@@ -14,7 +15,7 @@ import {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  
+
 
   const [user, setUser] = useState(null);
 
@@ -24,15 +25,12 @@ export const AuthProvider = ({ children }) => {
 
     const restoreSession = async () => {
 
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-
-        setLoading(false);
-
-        return;
-
-      }
+      // CHANGED: we can no longer check localStorage for a token before
+      // deciding whether to call getProfile() — the access token now
+      // lives in an httpOnly cookie that JS has no visibility into.
+      // Instead, just attempt the call; the browser attaches the cookie
+      // automatically (axiosInstance has withCredentials: true), and a
+      // 401 here simply means "not logged in."
 
       try {
 
@@ -45,7 +43,10 @@ export const AuthProvider = ({ children }) => {
 
       catch {
 
-        logout();
+        // No valid session cookie (or it expired). Just ensure local
+        // state is clear — no server call needed here since there's
+        // nothing valid to invalidate.
+        setUser(null);
 
       }
 
@@ -65,14 +66,15 @@ export const AuthProvider = ({ children }) => {
 
     const response = await loginUser(credentials);
 
+    // CHANGED: no more reading accessToken/token out of the response body
+    // and writing it to localStorage — the backend now sets the access
+    // and refresh tokens as httpOnly cookies directly via Set-Cookie.
+    // The response body should now only contain the user object (confirm
+    // authService.js / authController.js login response shape matches).
+
     if (response?.success) {
       const payload = response.data || {};
-      const token = payload.accessToken || payload.token;
       const userData = payload.user || null;
-
-      if (token) {
-        localStorage.setItem("token", token);
-      }
 
       if (userData) {
         localStorage.setItem("user", JSON.stringify(userData));
@@ -84,15 +86,24 @@ export const AuthProvider = ({ children }) => {
 
   };
 
- const logout = () => {
+  const logout = async () => {
 
-    localStorage.removeItem("token");
+    // CHANGED: logout must now call the backend, since only the server
+    // can clear httpOnly cookies. Clearing local state alone would leave
+    // valid cookies sitting in the browser.
+    try {
+      await logoutUser();
+    } catch {
+      // Even if the server call fails (e.g. network issue), fall through
+      // and clear local state so the UI reflects logged-out immediately.
+      // The cookie may persist until it expires naturally in this edge case.
+    }
 
     localStorage.removeItem("user");
 
     setUser(null);
 
-};
+  };
 
   const updateProfile = async (profile) => {
     const response = await updateProfileRequest(profile);
@@ -126,4 +137,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () =>
-useContext(AuthContext);
+  useContext(AuthContext);

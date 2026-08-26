@@ -26,6 +26,22 @@ export const getProfile = async () => {
 
 };
 
+// NEW: needed because logout now has to be a real server call — only the
+// server can clear the httpOnly cookies. AuthContext.jsx already imports
+// this; it didn't exist before because logout used to be purely local
+// (just clearing localStorage).
+export const logoutUser = async () => {
+
+  const response = await axiosInstance.post(
+
+    "/auth/logout"
+
+  );
+
+  return response.data;
+
+};
+
 export const changePassword = async (payload) => {
 
     const response = await axiosInstance.patch(

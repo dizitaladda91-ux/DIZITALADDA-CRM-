@@ -19,17 +19,18 @@ const axiosInstance = axios.create({
 
   timeout: 15000,
 
+  // NEW: send httpOnly auth cookies with every request.
+  // Required for the backend to see the cookie-based access/refresh tokens.
+  withCredentials: true,
+
 });
 
 axiosInstance.interceptors.request.use((config) => {
 
-  const token = localStorage.getItem("token");
-
-  if (token) {
-
-    config.headers.Authorization = `Bearer ${token}`;
-
-  }
+  // REMOVED: manual Authorization header injection from localStorage.
+  // The access token now lives in an httpOnly cookie and is attached
+  // automatically by the browser via withCredentials — no JS access to it,
+  // which is the whole point (mitigates XSS token theft).
 
   if (
     config.url &&
@@ -54,8 +55,17 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401) {
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // NEW: no more localStorage.removeItem("token"/"user") — there's
+      // nothing to remove client-side anymore. The server clears the
+      // cookies on logout/expiry; here we just redirect.
+      //
+      // NOTE (flagging, not implementing yet): this still hard-redirects
+      // on any 401, including a merely-expired access token that a silent
+      // refresh-token call could have recovered from. A follow-up upgrade
+      // would intercept 401s, call POST /auth/refresh once, retry the
+      // original request, and only redirect if the refresh itself fails.
+      // Keeping current behavior for this patch to keep the change scoped
+      // to storage location, not auth flow behavior.
 
       window.location.href = "/";
 

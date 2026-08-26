@@ -5,25 +5,29 @@ import {
   getLeadAssignmentHistory,
 } from "../controllers/leadAssignmentController.js";
 
-import verifyToken from "../middleware/authMiddleware.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+import ROLES from "../constants/roles.js";
 
 const router = express.Router();
 
 router.put(
   "/:leadId/assign",
-  verifyToken,
+  authMiddleware,
+  roleMiddleware(ROLES.ADMIN),
   assignLead
 );
 
 router.put(
   "/:leadId/reassign",
-  verifyToken,
+  authMiddleware,
+  roleMiddleware(ROLES.ADMIN),
   reassignLead
 );
 
 router.get(
   "/:leadId/history",
-  verifyToken,
+  authMiddleware,
   getLeadAssignmentHistory
 );
 
