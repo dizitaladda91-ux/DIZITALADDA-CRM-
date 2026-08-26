@@ -133,6 +133,9 @@ app.use("/api/followups", followupRoutes);
 app.use("/api/lead-sources", leadSourceRoutes);
 app.use("/api/lead-routing", leadRoutingRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admissions", admissionRoutes);
+
+import admissionRoutes from "./routes/admissionRoutes.js";
 
 /**
  * 404 Handler

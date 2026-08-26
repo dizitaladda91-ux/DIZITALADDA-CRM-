@@ -114,6 +114,46 @@ export const addLeadFeedbackService = async (
 
     const updatedLead = updateResult.rows[0];
 
+    // Auto-create/sync Admission Ledger if status is ENROLLED
+    if (["ENROLLED", "ADMISSION", "ADMISSION_DONE"].includes(targetStatus.toUpperCase())) {
+      try {
+        const countRes = await client.query("SELECT COUNT(*) FROM admissions WHERE lead_id = $1;", [leadId]);
+        if (Number(countRes.rows[0].count) === 0) {
+          const admCount = (await client.query("SELECT COUNT(*) FROM admissions;")).rows[0].count;
+          const admCode = `ADM${Number(admCount) + 1001}`;
+          const totFee = Number(feedback_fields.total_fee) || 120000;
+          const pdFee = Number(feedback_fields.fee_paid || feedback_fields.paid_fee) || 25000;
+          const pndFee = Math.max(0, totFee - pdFee);
+
+          await client.query(`
+            INSERT INTO admissions (
+              admission_code, lead_id, student_name, mobile, email,
+              course_name, campus_centre, total_fee, paid_fee, pending_fee,
+              receipt_no, next_due_date, status, assigned_to, remarks
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'ENROLLED', $13, $14);
+          `, [
+            admCode,
+            leadId,
+            fullName,
+            mobile,
+            email || null,
+            interestedCourse || feedback_fields.course_name || "BCA",
+            preferredCentre || "Main Campus",
+            totFee,
+            pdFee,
+            pndFee,
+            feedback_fields.receipt_no || null,
+            feedback_fields.next_due_date || null,
+            lead.assigned_to,
+            summaryText,
+          ]);
+        }
+      } catch (admErr) {
+        console.warn("Admission auto-sync notice:", admErr.message);
+      }
+    }
+
     // 4. Log Timeline event
     await addTimelineEventService({
       leadId,

@@ -1,0 +1,40 @@
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import {
+  getAdmissionsService,
+  createAdmissionService,
+  collectFeeService,
+} from "../services/admissionService.js";
+
+/**
+ * Get Admissions List
+ */
+export const getAdmissions = asyncHandler(async (req, res) => {
+  const result = await getAdmissionsService(req.user, req.query);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "Admissions fetched successfully."));
+});
+
+/**
+ * Create New Admission
+ */
+export const createAdmission = asyncHandler(async (req, res) => {
+  const admission = await createAdmissionService(req.body, req.user);
+  return res
+    .status(201)
+    .json(new ApiResponse(201, admission, "Admission created successfully."));
+});
+
+/**
+ * Collect Fee Installment
+ */
+export const collectFee = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const updatedAdmission = await collectFeeService(id, req.body);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedAdmission, "Fee payment recorded successfully.")
+    );
+});
