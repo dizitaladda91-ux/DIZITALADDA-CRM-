@@ -1,10 +1,10 @@
 import React from "react";
-import { Sparkles, Tag, AlertCircle, Calendar, CreditCard, DollarSign } from "lucide-react";
+import { Tag, AlertCircle, Calendar, CreditCard, DollarSign, Sliders } from "lucide-react";
 import "./LeadDetailsDrawer.css";
 
 /**
  * CounsellorNotesTab Component (Tab 3)
- * Guided Step 3: Guided Counselling & Contextual Action Engine
+ * Clean Enterprise Guided Counselling Form
  * Statuses: INTERESTED, FOLLOW_UP, VISITED, ENROLLED, NOT_INTERESTED, NEW
  */
 const CounsellorNotesTab = ({
@@ -26,17 +26,17 @@ const CounsellorNotesTab = ({
       ? "crm-badge-medium"
       : "crm-badge-low";
 
-  const priorityLabel = rawPriority === "HIGH" ? "HIGH 🔥" : rawPriority;
+  const priorityLabel = rawPriority;
 
   return (
     <>
-      {/* Lead Status & Smart Priority Card */}
+      {/* Lead Status & Priority Card */}
       <div className="crm-card">
         <div className="crm-card-header">
           <Tag className="text-blue-600" size={20} />
           <div>
-            <h3 className="crm-card-title">📌 Step 3: Lead Status & Priority Engine</h3>
-            <p className="crm-card-subtitle">Select standardized status to trigger contextual workflow</p>
+            <h3 className="crm-card-title">Step 3: Lead Status & Priority Engine</h3>
+            <p className="crm-card-subtitle">Select status to trigger relevant workflow fields</p>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ const CounsellorNotesTab = ({
           {/* Standardized Status Selector */}
           <div className="crm-field">
             <label className="crm-label">
-              Standardized Lead Status <span className="crm-required">*</span>
+              Lead Status <span className="crm-required">*</span>
             </label>
             <select
               disabled={!isEditable}
@@ -52,18 +52,18 @@ const CounsellorNotesTab = ({
               onChange={(e) => onStatusSelect(e.target.value)}
               className="crm-select"
             >
-              <option value="INTERESTED">🔥 INTERESTED (High Intent)</option>
-              <option value="FOLLOW_UP">📞 FOLLOW_UP (Scheduled Callback)</option>
-              <option value="VISITED">🏫 VISITED (Campus Visited)</option>
-              <option value="ENROLLED">🎓 ENROLLED (Admission Confirmed & Fee Paid)</option>
-              <option value="NOT_INTERESTED">❌ NOT_INTERESTED (Lost / Dropped)</option>
-              <option value="NEW">🆕 NEW (Fresh Uncontacted Lead)</option>
+              <option value="INTERESTED">INTERESTED (High Intent)</option>
+              <option value="FOLLOW_UP">FOLLOW_UP (Scheduled Callback)</option>
+              <option value="VISITED">VISITED (Campus Visited)</option>
+              <option value="ENROLLED">ENROLLED (Admission Confirmed & Fee Paid)</option>
+              <option value="NOT_INTERESTED">NOT_INTERESTED (Lost / Dropped)</option>
+              <option value="NEW">NEW (Fresh Uncontacted Lead)</option>
             </select>
           </div>
 
           {/* Smart Priority Display */}
           <div className="crm-field">
-            <label className="crm-label">Smart Priority Score</label>
+            <label className="crm-label">Calculated Priority</label>
             <div style={{ display: "flex", alignItems: "center", height: "48px" }}>
               <span className={`crm-badge ${priorityClass}`}>
                 <AlertCircle size={14} />
@@ -74,14 +74,14 @@ const CounsellorNotesTab = ({
         </div>
       </div>
 
-      {/* Dynamic Contextual Action Engine Card */}
+      {/* Dynamic Action Form Card */}
       {isEditable && (
-        <div className="crm-card" style={{ borderColor: "#BFDBFE" }}>
+        <div className="crm-card">
           <div className="crm-card-header">
-            <Sparkles className="text-blue-600" size={20} />
+            <Sliders className="text-blue-600" size={20} />
             <div>
-              <h3 className="crm-card-title">⚡ Contextual Action Form</h3>
-              <p className="crm-card-subtitle">Dynamic fields based on selected status</p>
+              <h3 className="crm-card-title">Status Workflow Fields</h3>
+              <p className="crm-card-subtitle">Additional fields for selected status</p>
             </div>
           </div>
 
@@ -164,13 +164,13 @@ const CounsellorNotesTab = ({
               </div>
             )}
 
-            {/* 3. ENROLLED WORKFLOW (ADMISSION & FEE LEDGER INTEGRATION) */}
+            {/* 3. ENROLLED WORKFLOW */}
             {normStatus === "ENROLLED" && (
               <div>
                 <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
                   <CreditCard size={16} className="text-blue-600" />
                   <strong style={{ fontSize: "13px", color: "#1E293B" }}>
-                    Admission Form & Fee Ledger Entry
+                    Admission & Fee Payment Details
                   </strong>
                 </div>
 
@@ -282,7 +282,7 @@ const CounsellorNotesTab = ({
             {/* 5. INTERESTED WORKFLOW */}
             {normStatus === "INTERESTED" && (
               <div className="crm-field">
-                <label className="crm-label">Student Key Interest & Next Goal</label>
+                <label className="crm-label">Student Key Interest & Notes</label>
                 <input
                   type="text"
                   placeholder="e.g. Student requested fee structure & hostel details"
@@ -297,11 +297,11 @@ const CounsellorNotesTab = ({
           {/* Discussion Remarks Textarea */}
           <div className="crm-field">
             <label className="crm-label">
-              Discussion Remarks & Counselling Summary
+              Discussion Remarks & Summary
             </label>
             <textarea
               rows={4}
-              placeholder="Record call discussion summary, student response, parent concerns, and action items..."
+              placeholder="Record discussion summary, student response, parent concerns, and action items..."
               value={remarks}
               onChange={(e) => onRemarksChange(e.target.value)}
               className="crm-textarea"

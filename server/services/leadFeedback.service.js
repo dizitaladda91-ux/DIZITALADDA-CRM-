@@ -41,15 +41,19 @@ export const addLeadFeedbackService = async (
     const targetStatus = status || lead.status;
     const nextFollowup = feedback_fields.next_followup || academic_info.next_followup || lead.next_followup || null;
 
-    // Merge personal & academic information updates onto lead profile
-    const fullName = personal_info.full_name || feedback_fields.full_name || lead.full_name;
-    const mobile = personal_info.mobile || feedback_fields.mobile || lead.mobile;
-    const alternateMobile = personal_info.alternate_mobile !== undefined ? personal_info.alternate_mobile : (feedback_fields.alternate_mobile || lead.alternate_mobile);
-    const email = personal_info.email !== undefined ? personal_info.email : (feedback_fields.email || lead.email);
-    const city = personal_info.city !== undefined ? personal_info.city : (feedback_fields.city || lead.city);
-    const state = personal_info.state !== undefined ? personal_info.state : (feedback_fields.state || lead.state);
-    const interestedCourse = academic_info.interested_course || feedback_fields.interested_course || lead.interested_course;
-    const preferredCentre = academic_info.preferred_centre || feedback_fields.preferred_centre || lead.preferred_centre;
+    const isAlreadyEnrolled = ["ENROLLED", "ADMISSION", "ADMISSION_DONE", "COMPLETED"].includes(
+      (lead.status || "").toUpperCase()
+    );
+
+    // If student is already enrolled, lock core personal & academic identity details from accidental modification
+    const fullName = isAlreadyEnrolled ? lead.full_name : (personal_info.full_name || feedback_fields.full_name || lead.full_name);
+    const mobile = isAlreadyEnrolled ? lead.mobile : (personal_info.mobile || feedback_fields.mobile || lead.mobile);
+    const alternateMobile = isAlreadyEnrolled ? lead.alternate_mobile : (personal_info.alternate_mobile !== undefined ? personal_info.alternate_mobile : (feedback_fields.alternate_mobile || lead.alternate_mobile));
+    const email = isAlreadyEnrolled ? lead.email : (personal_info.email !== undefined ? personal_info.email : (feedback_fields.email || lead.email));
+    const city = isAlreadyEnrolled ? lead.city : (personal_info.city !== undefined ? personal_info.city : (feedback_fields.city || lead.city));
+    const state = isAlreadyEnrolled ? lead.state : (personal_info.state !== undefined ? personal_info.state : (feedback_fields.state || lead.state));
+    const interestedCourse = isAlreadyEnrolled ? lead.interested_course : (academic_info.interested_course || feedback_fields.interested_course || lead.interested_course);
+    const preferredCentre = isAlreadyEnrolled ? lead.preferred_centre : (academic_info.preferred_centre || feedback_fields.preferred_centre || lead.preferred_centre);
 
     // 1. Save Feedback record
     const feedbackRecord = await createLeadFeedbackRepository(client, {

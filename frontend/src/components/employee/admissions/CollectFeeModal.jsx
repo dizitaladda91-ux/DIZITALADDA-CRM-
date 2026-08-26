@@ -191,7 +191,7 @@ const CollectFeeModal = ({ admission, isOpen, onClose, onSuccess }) => {
           >
             <span>Remaining Balance After Payment:</span>
             <strong style={{ fontSize: "15px", color: newPending === 0 ? "#16A34A" : "#DC2626" }}>
-              ₹{newPending.toLocaleString("en-IN")} {newPending === 0 ? "(FULLY PAID 🎉)" : ""}
+              ₹{newPending.toLocaleString("en-IN")} {newPending === 0 ? "(FULLY PAID)" : ""}
             </strong>
           </div>
 

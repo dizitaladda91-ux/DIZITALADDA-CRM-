@@ -9,7 +9,7 @@ const MyLeadsHeader = () => {
   return (
     <div className="my-leads-header">
       <div className="header-left">
-        <h2>👥 My Leads Pipeline</h2>
+        <h2>My Leads Pipeline</h2>
         <p>
           Manage, track, and counsel all assigned student leads from one place.
         </p>

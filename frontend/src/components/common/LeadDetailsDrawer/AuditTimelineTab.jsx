@@ -4,7 +4,7 @@ import "./LeadDetailsDrawer.css";
 
 /**
  * AuditTimelineTab Component (Tab 4)
- * Guided Step 4: Full Audit Timeline & Quick Internal Notes Composer
+ * Clean Enterprise Audit Timeline & Internal Notes Composer
  */
 const AuditTimelineTab = ({
   feedbackHistory = [],
@@ -38,7 +38,7 @@ const AuditTimelineTab = ({
           <div className="crm-card-header">
             <MessageSquare className="text-blue-600" size={20} />
             <div>
-              <h3 className="crm-card-title">📝 Quick Internal Note Composer</h3>
+              <h3 className="crm-card-title">Quick Internal Note Composer</h3>
               <p className="crm-card-subtitle">
                 Add an internal note or discussion point without changing the lead status
               </p>
@@ -74,7 +74,7 @@ const AuditTimelineTab = ({
           <Clock className="text-blue-600" size={20} />
           <div>
             <h3 className="crm-card-title">
-              🕒 Full Audit Timeline ({feedbackHistory.length + 1})
+              Full Audit Timeline ({feedbackHistory.length + 1})
             </h3>
             <p className="crm-card-subtitle">
               Chronological log of lead capture, status updates, calls, and discussions

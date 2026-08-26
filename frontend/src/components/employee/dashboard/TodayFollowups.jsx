@@ -23,7 +23,7 @@ const TodayFollowups = ({ followUps = [] }) => {
   return (
     <div className="followup-card">
       <div className="followup-header">
-        <h3>📞 Today's Scheduled Follow-ups</h3>
+        <h3>Today's Scheduled Follow-ups</h3>
 
         <button
           type="button"

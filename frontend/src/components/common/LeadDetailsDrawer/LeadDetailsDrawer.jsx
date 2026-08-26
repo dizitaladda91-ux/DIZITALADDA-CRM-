@@ -241,6 +241,9 @@ const LeadDetailsDrawer = ({
   }
 
   const currentLead = leadDetails || lead;
+  const isEnrolled = ["ENROLLED", "ADMISSION", "ADMISSION_DONE", "COMPLETED"].includes(
+    (currentLead?.status || selectedStatus || "").toUpperCase()
+  );
 
   return (
     <>
@@ -266,6 +269,7 @@ const LeadDetailsDrawer = ({
               formData={personalData}
               onFormChange={setPersonalData}
               isEditable={isEditable}
+              isLocked={isEnrolled}
             />
           )}
 
@@ -276,6 +280,7 @@ const LeadDetailsDrawer = ({
               onFormChange={setAcademicData}
               lead={currentLead}
               isEditable={isEditable}
+              isLocked={isEnrolled}
             />
           )}
 

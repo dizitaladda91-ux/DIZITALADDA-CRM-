@@ -140,7 +140,7 @@ const MyFollowups = () => {
               margin: 0,
             }}
           >
-            📞 Follow-up Planner & Calls
+            Follow-up Planner & Calls
           </h1>
           <p
             style={{

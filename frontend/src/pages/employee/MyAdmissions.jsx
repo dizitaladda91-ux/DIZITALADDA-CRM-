@@ -108,7 +108,7 @@ const MyAdmissions = () => {
       >
         <div>
           <h1 style={{ fontSize: "20px", fontWeight: 800, color: "#0F172A", margin: 0 }}>
-            🎓 Admissions & Fee Ledger
+            Admissions & Fee Ledger
           </h1>
           <p style={{ fontSize: "13px", color: "#64748B", margin: "4px 0 0 0", fontWeight: 500 }}>
             Track enrolled students, manage fee installments, record receipts, and monitor outstanding dues
