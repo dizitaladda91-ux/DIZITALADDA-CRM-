@@ -4,6 +4,7 @@ import helmet from "helmet";
 import compression from "compression";
 import hpp from "hpp";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 import validateEnv from "./config/env.js";
 
@@ -16,12 +17,11 @@ import leadRoutes from "./routes/leadRoutes.js";
 import healthRoutes from "./routes/health.routes.js";
 import leadCaptureRoutes from "./routes/leadCaptureRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-import leadAssignmentRoutes
-from "./routes/leadAssignmentRoutes.js";
-import followupRoutes
-from "./routes/followupRoutes.js";
+import leadAssignmentRoutes from "./routes/leadAssignmentRoutes.js";
+import followupRoutes from "./routes/followupRoutes.js";
 import leadSourceRoutes from "./routes/leadSourceRoutes.js";
 import leadRoutingRoutes from "./routes/leadRoutingRoutes.js";
+
 /* Middlewares */
 import { globalLimiter } from "./middleware/rateLimiter.js";
 import requestId from "./middleware/requestId.js";
@@ -40,9 +40,9 @@ const localDevelopmentOrigins = [
 
 const allowedOrigins = [...new Set([
   ...(process.env.CLIENT_URL || "")
-  .split(",")
-  .map((origin) => origin.trim().replace(/\/$/, ""))
-  .filter(Boolean),
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean),
   ...localDevelopmentOrigins,
 ])];
 
@@ -60,8 +60,6 @@ validateEnv();
  */
 app.use(cors({
   origin(origin, callback) {
-    // Requests without an Origin header include Render health checks and
-    // server-to-server calls, which do not need browser CORS protection.
     if (!origin || process.env.NODE_ENV !== "production") {
       return callback(null, true);
     }
@@ -77,8 +75,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
+app.use(cookieParser());
 app.use(express.json());
-
 app.use(
   express.urlencoded({
     extended: true,
@@ -91,11 +89,8 @@ app.use(
  * =====================================================
  */
 app.use(helmet());
-
 app.use(compression());
-
 app.use(hpp());
-
 app.use(globalLimiter);
 
 /**
@@ -104,9 +99,7 @@ app.use(globalLimiter);
  * =====================================================
  */
 app.use(requestId);
-
 app.use(requestLogger);
-
 app.use(morgan("dev"));
 
 /**
@@ -115,17 +108,11 @@ app.use(morgan("dev"));
  * =====================================================
  */
 app.get("/", (req, res) => {
-
   res.status(200).json({
-
     success: true,
-
     message: "IEM LMS API Running Successfully 🚀",
-
     version: "1.0.0",
-
   });
-
 });
 
 app.get("/favicon.ico", (req, res) => {
@@ -148,31 +135,14 @@ app.use("/auth", authRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use("/api/campaigns", campaignRoutes);
-
 app.use("/api/departments", departmentRoutes);
-
 app.use("/api/employees", employeeRoutes);
 app.use("/api/employee", employeePortalRoutes);
-
 app.use("/api/leads", leadRoutes);
-
-app.use(
-  "/api/public",
-  leadCaptureRoutes
-);
-
-app.use(
-"/api/lead-assignments",
-leadAssignmentRoutes
-);
-
+app.use("/api/public", leadCaptureRoutes);
+app.use("/api/lead-assignments", leadAssignmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
-app.use(
-    "/api/followups",
-    followupRoutes
-);
-
+app.use("/api/followups", followupRoutes);
 app.use("/api/lead-sources", leadSourceRoutes);
 app.use("/api/lead-routing", leadRoutingRoutes);
 
