@@ -23,6 +23,7 @@ import {
 } from "../../services/leadAssignmentService";
 import LeadDetailsDrawer from "../../components/common/LeadDetailsDrawer/LeadDetailsDrawer";
 import DeleteLeadModal from "../../components/LeadManagement/DeleteLeadModal";
+import { exportToCsv } from "../../utils/exportCsv";
 const LeadManagement = () => {
 
   /*
@@ -451,6 +452,27 @@ const openAssignModal = () => {
   setAssignModal(true);
 
 };
+
+  const handleExportAdminLeadsCsv = () => {
+    exportToCsv(
+      `Dizital_Adda_Leads_${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { header: "Lead Code", key: "lead_code" },
+        { header: "Full Name", key: "full_name" },
+        { header: "Mobile", key: "mobile" },
+        { header: "Email", key: "email" },
+        { header: "Course", key: "interested_course" },
+        { header: "Campus", key: "preferred_centre" },
+        { header: "Source", key: "source" },
+        { header: "Status", key: "status" },
+        { header: "Priority", key: "priority" },
+        { header: "Counsellor", key: "assigned_to_name" },
+        { header: "Created Date", key: "created_at" },
+      ],
+      leads
+    );
+  };
+
   return (
 
     <div className="lead-management-page">
@@ -460,6 +482,8 @@ const openAssignModal = () => {
         loading={loading}
 
         onRefresh={loadLeads}
+        onExport={handleExportAdminLeadsCsv}
+        onCreateLead={() => console.log("Create Lead")}
 
       />
 

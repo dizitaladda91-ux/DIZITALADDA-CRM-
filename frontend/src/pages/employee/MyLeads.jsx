@@ -4,6 +4,7 @@ import MyLeadsHeader from "../../components/employee/myLeads/MyLeadsHeader/MyLea
 import SearchFilterBar from "../../components/employee/myLeads/SearchFilterBar/SearchFilterBar";
 import LeadsTable from "../../components/employee/myLeads/LeadsTable/LeadsTable";
 import { getMyLeads } from "../../services/employeeLeadService";
+import { exportToCsv } from "../../utils/exportCsv";
 
 const MyLeads = () => {
   const [leads, setLeads] = useState([]);
@@ -45,9 +46,28 @@ const MyLeads = () => {
     setSource("ALL");
   };
 
+  const handleExportCsv = () => {
+    exportToCsv(
+      `Dizital_Adda_MyLeads_${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { header: "Lead Code", key: "lead_code" },
+        { header: "Student Name", key: "full_name" },
+        { header: "Mobile", key: "mobile" },
+        { header: "Email", key: "email" },
+        { header: "Interested Course", key: "interested_course" },
+        { header: "Status", key: "status" },
+        { header: "Priority", key: "priority" },
+        { header: "Source", key: "source" },
+        { header: "Remarks", key: "remarks" },
+        { header: "Created Date", key: "created_at" },
+      ],
+      leads
+    );
+  };
+
   return (
     <div className="my-leads-page">
-      <MyLeadsHeader />
+      <MyLeadsHeader onExport={handleExportCsv} />
 
       <SearchFilterBar
         search={search}

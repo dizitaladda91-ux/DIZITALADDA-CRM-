@@ -10,12 +10,14 @@ import {
   ArrowRight,
   Filter,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LeadDetailsDrawer from "../../components/common/LeadDetailsDrawer/LeadDetailsDrawer";
 import UpdateFollowupModal from "../../components/employee/followups/UpdateFollowupModal";
 import { getFollowups } from "../../services/followupService";
+import { exportToCsv } from "../../utils/exportCsv";
 
 const MyFollowups = () => {
   const navigate = useNavigate();
@@ -126,6 +128,23 @@ const MyFollowups = () => {
     setIsUpdateModalOpen(true);
   };
 
+  const handleExportFollowupsCsv = () => {
+    exportToCsv(
+      `Dizital_Adda_Followups_${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { header: "Lead Code", key: "lead_code" },
+        { header: "Student Name", key: "lead_name" },
+        { header: "Mobile", key: "mobile" },
+        { header: "Interested Course", key: "interested_course" },
+        { header: "Channel", key: "followup_type" },
+        { header: "Scheduled Time", key: "next_followup_at" },
+        { header: "Status", key: "status" },
+        { header: "Remarks", key: "remarks" },
+      ],
+      filteredFollowups
+    );
+  };
+
   return (
     <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
       {/* Header Banner */}
@@ -165,15 +184,27 @@ const MyFollowups = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/employee/leads")}
-          className="crm-btn-primary"
-          style={{ height: "42px", padding: "0 18px", fontSize: "13px" }}
-        >
-          <span>Go to My Leads Pipeline</span>
-          <ArrowRight size={16} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={handleExportFollowupsCsv}
+            className="crm-btn-secondary"
+            style={{ height: "42px", backgroundColor: "#F1F5F9" }}
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/employee/leads")}
+            className="crm-btn-primary"
+            style={{ height: "42px", padding: "0 18px", fontSize: "13px" }}
+          >
+            <span>Go to My Leads Pipeline</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Metric Cards Grid */}

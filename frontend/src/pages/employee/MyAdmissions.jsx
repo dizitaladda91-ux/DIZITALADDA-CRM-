@@ -11,12 +11,14 @@ import {
   Search,
   Filter,
   ArrowRight,
+  Download,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import CollectFeeModal from "../../components/employee/admissions/CollectFeeModal";
 import LeadDetailsDrawer from "../../components/common/LeadDetailsDrawer/LeadDetailsDrawer";
 import { getAdmissions } from "../../services/admissionService";
+import { exportToCsv } from "../../utils/exportCsv";
 
 const MyAdmissions = () => {
   const navigate = useNavigate();
@@ -106,6 +108,27 @@ const MyAdmissions = () => {
     return `https://wa.me/91${cleanMobile}?text=${encodeURIComponent(messageText)}`;
   };
 
+  const handleExportAdmissionsCsv = () => {
+    exportToCsv(
+      `Dizital_Adda_Admissions_${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { header: "Admission Code", key: "admission_code" },
+        { header: "Student Name", key: "student_name" },
+        { header: "Mobile", key: "mobile" },
+        { header: "Email", key: "email" },
+        { header: "Course Name", key: "course_name" },
+        { header: "Campus Centre", key: "campus_centre" },
+        { header: "Total Fee (₹)", key: "total_fee" },
+        { header: "Paid Fee (₹)", key: "paid_fee" },
+        { header: "Pending Fee (₹)", key: "pending_fee" },
+        { header: "Receipt No", key: "receipt_no" },
+        { header: "Next Due Date", key: "next_due_date" },
+        { header: "Status", key: "status" },
+      ],
+      filteredAdmissions
+    );
+  };
+
   return (
     <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
       {/* Top Banner Header */}
@@ -132,6 +155,16 @@ const MyAdmissions = () => {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={handleExportAdmissionsCsv}
+            className="crm-btn-secondary"
+            style={{ height: "42px", backgroundColor: "#F1F5F9" }}
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </button>
+
           <button
             type="button"
             onClick={() => navigate("/employee/leads")}

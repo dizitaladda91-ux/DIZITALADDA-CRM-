@@ -1,9 +1,9 @@
 import React from "react";
 import "./MyLeadsHeader.css";
-import { Calendar, GraduationCap, Award } from "lucide-react";
+import { Calendar, GraduationCap, Award, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const MyLeadsHeader = () => {
+const MyLeadsHeader = ({ onExport = () => {} }) => {
   const navigate = useNavigate();
 
   return (
@@ -16,6 +16,17 @@ const MyLeadsHeader = () => {
       </div>
 
       <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <button
+          type="button"
+          className="export-btn"
+          onClick={onExport}
+          title="Export My Leads to CSV/Excel"
+          style={{ backgroundColor: "#F1F5F9", color: "#334155" }}
+        >
+          <Download size={18} />
+          <span>Export CSV</span>
+        </button>
+
         <button
           type="button"
           className="export-btn"
