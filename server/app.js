@@ -23,6 +23,7 @@ import leadSourceRoutes from "./routes/leadSourceRoutes.js";
 import leadRoutingRoutes from "./routes/leadRoutingRoutes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import employeePortalRoutes from "./routes/employeePortal.routes.js";
+import admissionRoutes from "./routes/admissionRoutes.js";
 
 /* Middlewares */
 import { globalLimiter } from "./middleware/rateLimiter.js";
@@ -134,8 +135,6 @@ app.use("/api/lead-sources", leadSourceRoutes);
 app.use("/api/lead-routing", leadRoutingRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admissions", admissionRoutes);
-
-import admissionRoutes from "./routes/admissionRoutes.js";
 
 /**
  * 404 Handler
