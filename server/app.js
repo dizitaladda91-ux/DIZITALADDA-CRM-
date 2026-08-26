@@ -102,7 +102,7 @@ app.use(morgan("dev"));
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "IEM LMS API Running Successfully 🚀",
+    message: "Dizital Adda CRM API Running Successfully 🚀",
     version: "1.0.0",
   });
 });

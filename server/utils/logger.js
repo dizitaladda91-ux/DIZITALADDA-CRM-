@@ -17,7 +17,7 @@ const logger = winston.createLogger({
   ),
 
   defaultMeta: {
-    service: "IEM-LMS-Backend",
+    service: "DizitalAdda-CRM-Backend",
   },
 
   transports: [

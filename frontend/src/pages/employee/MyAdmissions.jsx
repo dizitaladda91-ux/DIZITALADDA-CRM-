@@ -90,6 +90,22 @@ const MyAdmissions = () => {
     setIsLeadDrawerOpen(true);
   };
 
+  const getFeeReminderWhatsAppUrl = (item) => {
+    const cleanMobile = (item.mobile || "").replace(/\D/g, "");
+    if (!cleanMobile) return "#";
+    const dueDateStr = item.next_due_date
+      ? new Date(item.next_due_date).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "as soon as possible";
+
+    const messageText = `Hello ${item.student_name}! 👋\n\nThis is a friendly reminder from Dizital Adda Admissions Office regarding your pending fee installment of ₹${Number(item.pending_fee || 0).toLocaleString("en-IN")} for ${item.course_name || "your course"}.\n\nReceipt Reference: ${item.receipt_no || "N/A"}\nDue Date: ${dueDateStr}\n\nKindly complete the fee payment to avoid any delay. Feel free to reply here if you have any questions.\n\nThank you,\nDizital Adda Admissions Team`;
+
+    return `https://wa.me/91${cleanMobile}?text=${encodeURIComponent(messageText)}`;
+  };
+
   return (
     <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
       {/* Top Banner Header */}
@@ -415,37 +431,44 @@ const MyAdmissions = () => {
                       <td style={{ padding: "14px 16px", textAlign: "right" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px" }}>
                           {cleanMobile && (
-                            <>
-                              <a
-                                href={`tel:${cleanMobile}`}
-                                title={`Call ${item.student_name}`}
-                                style={{
-                                  padding: "6px",
-                                  borderRadius: "8px",
-                                  backgroundColor: "#DCFCE7",
-                                  color: "#16A34A",
-                                  display: "inline-flex",
-                                }}
-                              >
-                                <Phone size={14} />
-                              </a>
+                            <a
+                              href={`tel:${cleanMobile}`}
+                              title={`Call ${item.student_name}`}
+                              style={{
+                                padding: "6px",
+                                borderRadius: "8px",
+                                backgroundColor: "#DCFCE7",
+                                color: "#16A34A",
+                                display: "inline-flex",
+                              }}
+                            >
+                              <Phone size={14} />
+                            </a>
+                          )}
 
-                              <a
-                                href={`https://wa.me/91${cleanMobile}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={`WhatsApp ${item.student_name}`}
-                                style={{
-                                  padding: "6px",
-                                  borderRadius: "8px",
-                                  backgroundColor: "#E0E7FF",
-                                  color: "#4338CA",
-                                  display: "inline-flex",
-                                }}
-                              >
-                                <MessageCircle size={14} />
-                              </a>
-                            </>
+                          {cleanMobile && pending > 0 && (
+                            <a
+                              href={getFeeReminderWhatsAppUrl(item)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Send WhatsApp Fee Reminder"
+                              style={{
+                                padding: "0 10px",
+                                height: "32px",
+                                borderRadius: "8px",
+                                backgroundColor: "#25D366",
+                                color: "#FFFFFF",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <MessageCircle size={13} />
+                              <span>Fee Reminder</span>
+                            </a>
                           )}
 
                           <button

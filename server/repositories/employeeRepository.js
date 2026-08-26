@@ -896,34 +896,60 @@ export const getEmployeeStatisticsRepository = async () => {
 
 };
 
-export const getEmployeePerformanceRepository = async (employeeId) => {
-    const [summaryResult, dailyResult, domainsResult] = await Promise.all([
+export const getEmployeePerformanceRepository = async (employeeId, timeframe = "all") => {
+    let dateClause = "";
+    if (timeframe === "week") {
+      dateClause = " AND l.created_at >= CURRENT_DATE - INTERVAL '7 days'";
+    } else if (timeframe === "month") {
+      dateClause = " AND l.created_at >= CURRENT_DATE - INTERVAL '30 days'";
+    }
+
+    const [summaryResult, revenueResult, leadsResult] = await Promise.all([
         pool.query(`
           SELECT
-            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE) AS total_leads,
-            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'PENDING') AS pending_followups,
-            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'COMPLETED') AS completed_followups,
-            COUNT(DISTINCT lf.id) FILTER (WHERE lf.is_deleted = FALSE AND lf.status = 'COMPLETED' AND lf.updated_at::date = CURRENT_DATE) AS completed_today
+            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE ${dateClause}) AS total_leads,
+            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE AND UPPER(l.status) IN ('FOLLOW_UP', 'NEW', 'PENDING') ${dateClause}) AS pending_followups,
+            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE AND UPPER(l.status) IN ('ENROLLED', 'ADMISSION', 'ADMISSION_DONE', 'COMPLETED') ${dateClause}) AS enrolled_conversions,
+            COUNT(DISTINCT l.id) FILTER (WHERE l.is_deleted = FALSE AND UPPER(l.status) = 'NOT_INTERESTED' ${dateClause}) AS rejected_leads
           FROM employees e
           LEFT JOIN leads l ON l.assigned_to = e.id
-          LEFT JOIN lead_followups lf ON lf.employee_id = e.id
           WHERE e.id = $1
         `, [employeeId]),
         pool.query(`
-          SELECT completed_on AS date, COUNT(lf.id)::int AS completed
-          FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, INTERVAL '1 day') completed_on
-          LEFT JOIN lead_followups lf ON lf.employee_id = $1 AND lf.is_deleted = FALSE
-            AND lf.status = 'COMPLETED' AND lf.updated_at::date = completed_on::date
-          GROUP BY completed_on
-          ORDER BY completed_on
+          SELECT COALESCE(SUM(paid_fee), 0) AS total_revenue
+          FROM admissions
+          WHERE assigned_to = $1;
         `, [employeeId]),
         pool.query(`
-          SELECT d.name
-          FROM counsellor_routing_assignments ra
-          JOIN lead_domains d ON d.id = ra.domain_id
-          WHERE ra.employee_id = $1 AND ra.is_active = TRUE
-          GROUP BY d.id, d.name ORDER BY d.name
+          SELECT
+            l.id, l.lead_code, l.full_name, l.mobile, l.email,
+            l.interested_course, l.status, l.priority, l.created_at
+          FROM leads l
+          WHERE l.assigned_to = $1 AND l.is_deleted = FALSE ${dateClause}
+          ORDER BY l.created_at DESC
+          LIMIT 20;
         `, [employeeId]),
     ]);
-    return { summary: summaryResult.rows[0], daily: dailyResult.rows, domains: domainsResult.rows.map((row) => row.name) };
+
+    const summaryRow = summaryResult.rows[0] || {};
+    const totalLeads = Number(summaryRow.total_leads || 0);
+    const enrolledCount = Number(summaryRow.enrolled_conversions || 0);
+    const pendingCount = Number(summaryRow.pending_followups || 0);
+    const rejectedCount = Number(summaryRow.rejected_leads || 0);
+    const totalRevenue = Number(revenueResult.rows[0]?.total_revenue || 0);
+
+    const conversionRate = totalLeads > 0 ? Math.round((enrolledCount / totalLeads) * 100) : 0;
+
+    return {
+        summary: {
+            total_leads: totalLeads,
+            pending_followups: pendingCount,
+            enrolled_conversions: enrolledCount,
+            rejected_leads: rejectedCount,
+            total_revenue: totalRevenue,
+            conversion_rate: conversionRate,
+            timeframe,
+        },
+        leads: leadsResult.rows,
+    };
 };

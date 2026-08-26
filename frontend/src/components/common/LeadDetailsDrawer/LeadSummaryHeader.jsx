@@ -35,7 +35,7 @@ const LeadSummaryHeader = ({ lead, onClose }) => {
 
   const cleanMobile = (lead.mobile || "").replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/91${cleanMobile}?text=${encodeURIComponent(
-    `Hello ${lead.full_name || ""}, warm greetings from IEM Admissions Team!`
+    `Hello ${lead.full_name || ""}, warm greetings from Dizital Adda Admissions Team!`
   )}`;
 
   return (

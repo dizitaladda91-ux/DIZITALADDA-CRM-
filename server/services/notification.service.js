@@ -4,7 +4,7 @@ import { findEmployeeByUserIdRepository } from "../repositories/employeeReposito
 /**
  * Role-Based Notification Service
  * Admin: Unassigned leads, confirmed admissions, system-wide overdue follow-ups
- * Employee: Today's scheduled calls, overdue reminders, newly assigned leads
+ * Employee/Counsellor: Today's calls, overdue calls, newly assigned leads, and Student Fee Due Alerts!
  */
 export const getRoleNotificationsService = async (user) => {
   const isAdmin = user.role === "ADMIN";
@@ -78,7 +78,7 @@ export const getRoleNotificationsService = async (user) => {
     return { unreadCount: 0, notifications: [] };
   }
 
-  const [todayCalls, overdueCalls, newAssigned] = await Promise.all([
+  const [todayCalls, overdueCalls, newAssigned, feeDues] = await Promise.all([
     pool.query(
       `
       SELECT id, lead_code, full_name, mobile, status, next_followup
@@ -106,9 +106,28 @@ export const getRoleNotificationsService = async (user) => {
     `,
       [employeeId]
     ),
+    pool.query(
+      `
+      SELECT id, lead_id, admission_code, student_name, mobile, pending_fee, receipt_no, next_due_date, course_name
+      FROM admissions
+      WHERE assigned_to = $1 AND pending_fee > 0 AND (next_due_date IS NULL OR next_due_date <= CURRENT_DATE + INTERVAL '2 days')
+      ORDER BY next_due_date ASC LIMIT 10
+    `,
+      [employeeId]
+    ),
   ]);
 
   const notifications = [
+    ...feeDues.rows.map((adm) => ({
+      id: `fee-due-${adm.id}`,
+      type: "FEE_DUE_REMINDER",
+      category: "Admissions",
+      title: "Student Fee Installment Due Alert",
+      message: `Fee installment of ₹${Number(adm.pending_fee).toLocaleString("en-IN")} for ${adm.student_name} (${adm.course_name}) is due ${adm.next_due_date ? new Date(adm.next_due_date).toLocaleDateString("en-IN") : "soon"}. Send WhatsApp reminder!`,
+      leadId: adm.lead_id,
+      createdAt: adm.next_due_date || new Date(),
+      isRead: false,
+    })),
     ...todayCalls.rows.map((l) => ({
       id: `today-${l.id}`,
       type: "TODAY_CALL",

@@ -119,7 +119,7 @@ const AcademicInformationTab = ({
               <input
                 type="text"
                 disabled
-                value={lead?.course_name || lead?.campaign_name || "IEM Admissions 2026"}
+                value={lead?.course_name || lead?.campaign_name || "Dizital Adda Admissions 2026"}
                 className="crm-input has-icon"
                 style={{ backgroundColor: "#F1F5F9" }}
               />

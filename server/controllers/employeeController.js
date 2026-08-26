@@ -270,12 +270,14 @@ export const getEmployeeStatisticsController = asyncHandler(
 );
 
 export const getEmployeePerformanceController = asyncHandler(async (req, res) => {
-    const performance = await getEmployeePerformanceService(req.params.id);
+    const timeframe = req.query.timeframe || "all";
+    const performance = await getEmployeePerformanceService(req.params.id, null, timeframe);
     return res.status(200).json(new ApiResponse(200, performance, "Employee performance fetched successfully."));
 });
 
 export const getMyPerformanceController = asyncHandler(async (req, res) => {
-    const performance = await getEmployeePerformanceService(null, req.user.id);
+    const timeframe = req.query.timeframe || "all";
+    const performance = await getEmployeePerformanceService(null, req.user.id, timeframe);
     return res.status(200).json(new ApiResponse(200, performance, "My performance scorecards fetched successfully."));
 });
 

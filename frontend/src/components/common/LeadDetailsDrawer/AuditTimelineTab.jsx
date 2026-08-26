@@ -165,7 +165,7 @@ const AuditTimelineTab = ({
                       <div className="crm-timeline-meta">
                         <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <User size={13} />
-                          Counsellor: {item.created_by_name || "IEM Counsellor"}
+                          Counsellor: {item.created_by_name || "Dizital Adda Counsellor"}
                         </span>
                         <span
                           style={{

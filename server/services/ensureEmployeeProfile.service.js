@@ -30,7 +30,7 @@ export const ensureEmployeeProfileForUser = async (userId) => {
   const { rows } = await pool.query(insertQuery, [
     user.id,
     empCode,
-    user.full_name || "IEM Staff",
+    user.full_name || "Dizital Adda Staff",
     user.email,
     user.mobile || `980000${String(user.id).padStart(4, "0")}`,
     user.role || "COUNSELLOR",
