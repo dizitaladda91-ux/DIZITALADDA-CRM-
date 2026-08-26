@@ -379,7 +379,7 @@ export async function createFollowupService(
  * file's audit notes) rather than looked up again here.
  * ============================================================================
  */
-import { ensureEmployeeProfileForUser } from "./employeePortal.service.js";
+import { ensureEmployeeProfileForUser } from "./ensureEmployeeProfile.service.js";
 
 export async function getAllFollowupsService(
   filters = {},

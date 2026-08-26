@@ -29,7 +29,7 @@ import {
 
 import { getMyLeadsRepository } from "../repositories/leadRepository.js";
 import { createRoutingAssignmentRepository } from "../repositories/leadRoutingRepository.js";
-import { ensureEmployeeProfileForUser } from "./employeePortal.service.js";
+import { ensureEmployeeProfileForUser } from "./ensureEmployeeProfile.service.js";
 
 const generateEmployeeCode = (sequence) => {
     const prefix = process.env.EMPLOYEE_CODE_PREFIX || "EMP";
