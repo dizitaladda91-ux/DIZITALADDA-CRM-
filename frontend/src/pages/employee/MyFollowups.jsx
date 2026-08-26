@@ -9,10 +9,12 @@ import {
   Eye,
   ArrowRight,
   Filter,
+  CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LeadDetailsDrawer from "../../components/common/LeadDetailsDrawer/LeadDetailsDrawer";
+import UpdateFollowupModal from "../../components/employee/followups/UpdateFollowupModal";
 import { getFollowups } from "../../services/followupService";
 
 const MyFollowups = () => {
@@ -24,6 +26,10 @@ const MyFollowups = () => {
   // Drawer state
   const [selectedLead, setSelectedLead] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Update Callback Modal state
+  const [selectedFollowup, setSelectedFollowup] = useState(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const loadFollowups = useCallback(async () => {
     try {
@@ -113,6 +119,11 @@ const MyFollowups = () => {
     };
     setSelectedLead(leadObj);
     setIsDrawerOpen(true);
+  };
+
+  const handleOpenUpdateModal = (item) => {
+    setSelectedFollowup(item);
+    setIsUpdateModalOpen(true);
   };
 
   return (
@@ -419,14 +430,14 @@ const MyFollowups = () => {
                       </td>
 
                       <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px" }}>
                           {cleanMobile && (
                             <>
                               <a
                                 href={`tel:${cleanMobile}`}
                                 title={`Call ${leadName}`}
                                 style={{
-                                  padding: "8px",
+                                  padding: "7px",
                                   borderRadius: "8px",
                                   backgroundColor: "#DCFCE7",
                                   color: "#16A34A",
@@ -435,7 +446,7 @@ const MyFollowups = () => {
                                   justifyContent: "center",
                                 }}
                               >
-                                <Phone size={15} />
+                                <Phone size={14} />
                               </a>
 
                               <a
@@ -444,7 +455,7 @@ const MyFollowups = () => {
                                 rel="noopener noreferrer"
                                 title={`WhatsApp ${leadName}`}
                                 style={{
-                                  padding: "8px",
+                                  padding: "7px",
                                   borderRadius: "8px",
                                   backgroundColor: "#E0E7FF",
                                   color: "#4338CA",
@@ -453,19 +464,30 @@ const MyFollowups = () => {
                                   justifyContent: "center",
                                 }}
                               >
-                                <MessageCircle size={15} />
+                                <MessageCircle size={14} />
                               </a>
                             </>
                           )}
 
                           <button
                             type="button"
-                            onClick={() => handleOpenLeadDrawer(item)}
+                            onClick={() => handleOpenUpdateModal(item)}
+                            title="Update Callback / Status"
                             className="crm-btn-primary"
-                            style={{ height: "34px", padding: "0 12px", fontSize: "12px" }}
+                            style={{ height: "32px", padding: "0 10px", fontSize: "11px", backgroundColor: "#2563EB" }}
+                          >
+                            <CheckCircle2 size={13} />
+                            <span>Update Callback</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenLeadDrawer(item)}
+                            title="View Lead Details"
+                            className="crm-btn-secondary"
+                            style={{ height: "32px", padding: "0 8px" }}
                           >
                             <Eye size={14} />
-                            <span>View / Update Lead</span>
                           </button>
                         </div>
                       </td>
@@ -478,7 +500,15 @@ const MyFollowups = () => {
         )}
       </div>
 
-      {/* Shared Guided 4-Step LeadDetailsDrawer */}
+      {/* Direct Follow-up Callback Action Modal */}
+      <UpdateFollowupModal
+        followup={selectedFollowup}
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        onSuccess={loadFollowups}
+      />
+
+      {/* Shared Lead Details Drawer */}
       <LeadDetailsDrawer
         open={isDrawerOpen}
         lead={selectedLead}
