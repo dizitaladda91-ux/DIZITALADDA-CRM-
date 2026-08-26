@@ -337,61 +337,49 @@ export const getLeadsRepository = async (filters) => {
   // Source Filter
   // ==========================
 
-  if (source) {
-
+  // Source Filter
+  if (source && String(source).toLowerCase() !== "all") {
     whereClause += `
-      AND l.source = $${index}
+      AND UPPER(l.source) = $${index}
     `;
-
-    values.push(source);
+    values.push(String(source).toUpperCase());
     index++;
-
   }
 
-  // ==========================
   // Status Filter
-  // ==========================
-
-  if (status) {
-
+  if (status && String(status).toLowerCase() !== "all") {
     whereClause += `
-      AND l.status = $${index}
+      AND UPPER(l.status) = $${index}
     `;
-
-    values.push(status);
+    values.push(String(status).toUpperCase());
     index++;
-
   }
 
-  // ==========================
   // Priority Filter
-  // ==========================
-
-  if (priority) {
-
+  if (priority && String(priority).toLowerCase() !== "all") {
     whereClause += `
-      AND l.priority = $${index}
+      AND UPPER(l.priority) = $${index}
     `;
-
-    values.push(priority);
+    values.push(String(priority).toUpperCase());
     index++;
-
   }
 
-  // ==========================
   // Assigned Employee Filter
-  // ==========================
-
   if (assigned_to) {
-
-    whereClause += `
-      AND l.assigned_to = $${index}
-    `;
-
-    values.push(assigned_to);
-    index++;
-
+    const assignedStr = String(assigned_to).toLowerCase();
+    if (assignedStr === "unassigned") {
+      whereClause += `
+        AND l.assigned_to IS NULL
+      `;
+    } else if (assignedStr !== "all" && !isNaN(Number(assigned_to))) {
+      whereClause += `
+        AND l.assigned_to = $${index}
+      `;
+      values.push(Number(assigned_to));
+      index++;
+    }
   }
+
 
   // ==========================
   // Count Query
@@ -552,35 +540,24 @@ export const getMyLeadsRepository = async (filters = {}) => {
 
   }
 
-  // ==========================
   // Status
-  // ==========================
-
-  if (status) {
-
+  if (status && String(status).toLowerCase() !== "all") {
     whereClause += `
-      AND l.status = $${index}
+      AND UPPER(l.status) = $${index}
     `;
-
-    values.push(status);
+    values.push(String(status).toUpperCase());
     index++;
-
   }
 
-  // ==========================
   // Priority
-  // ==========================
-
-  if (priority) {
-
+  if (priority && String(priority).toLowerCase() !== "all") {
     whereClause += `
-      AND l.priority = $${index}
+      AND UPPER(l.priority) = $${index}
     `;
-
-    values.push(priority);
+    values.push(String(priority).toUpperCase());
     index++;
-
   }
+
 
   // ==========================
   // Count
