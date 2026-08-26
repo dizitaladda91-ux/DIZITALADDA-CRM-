@@ -1,10 +1,10 @@
 import React from "react";
-import { User, Phone, Mail, MapPin } from "lucide-react";
+import { User, Phone, Mail, MapPin, Globe } from "lucide-react";
 import "./LeadDetailsDrawer.css";
 
 /**
- * PersonalInformationTab Component
- * Shared Personal Information card view (editable for employee, read-only for admin).
+ * PersonalInformationTab Component (Tab 1)
+ * Guided Step 1: Personal Contact Information
  */
 const PersonalInformationTab = ({
   formData,
@@ -23,8 +23,10 @@ const PersonalInformationTab = ({
       <div className="crm-card-header">
         <User className="text-blue-600" size={20} />
         <div>
-          <h3 className="crm-card-title">Personal Information</h3>
-          <p className="crm-card-subtitle">Basic contact and location details about the student</p>
+          <h3 className="crm-card-title">Step 1: Personal Contact Information</h3>
+          <p className="crm-card-subtitle">
+            Contact details, alternate parent mobile, and student location
+          </p>
         </div>
       </div>
 
@@ -41,17 +43,17 @@ const PersonalInformationTab = ({
               disabled={!isEditable}
               value={formData.full_name || ""}
               onChange={(e) => handleChange("full_name", e.target.value)}
-              placeholder="Enter full name"
+              placeholder="Enter student full name"
               className="crm-input has-icon"
               required
             />
           </div>
         </div>
 
-        {/* Mobile Number */}
+        {/* Primary Mobile Number */}
         <div className="crm-field">
           <label className="crm-label">
-            Mobile Number <span className="crm-required">*</span>
+            Primary Mobile Number <span className="crm-required">*</span>
           </label>
           <div className="crm-input-wrapper">
             <Phone size={16} className="crm-input-icon" />
@@ -60,16 +62,16 @@ const PersonalInformationTab = ({
               disabled={!isEditable}
               value={formData.mobile || ""}
               onChange={(e) => handleChange("mobile", e.target.value)}
-              placeholder="Enter mobile number"
+              placeholder="Enter 10-digit mobile number"
               className="crm-input has-icon"
               required
             />
           </div>
         </div>
 
-        {/* Alternate Mobile */}
+        {/* Alternate / Parent Mobile */}
         <div className="crm-field">
-          <label className="crm-label">Alternate Mobile</label>
+          <label className="crm-label">Alternate / Parent Mobile</label>
           <div className="crm-input-wrapper">
             <Phone size={16} className="crm-input-icon" />
             <input
@@ -77,7 +79,7 @@ const PersonalInformationTab = ({
               disabled={!isEditable}
               value={formData.alternate_mobile || ""}
               onChange={(e) => handleChange("alternate_mobile", e.target.value)}
-              placeholder="Enter alternate mobile"
+              placeholder="Parent / Guardian mobile number"
               className="crm-input has-icon"
             />
           </div>
@@ -95,7 +97,7 @@ const PersonalInformationTab = ({
               disabled={!isEditable}
               value={formData.email || ""}
               onChange={(e) => handleChange("email", e.target.value)}
-              placeholder="rohit@gmail.com"
+              placeholder="student@example.com"
               className="crm-input has-icon"
               required
             />
@@ -114,7 +116,7 @@ const PersonalInformationTab = ({
               disabled={!isEditable}
               value={formData.city || ""}
               onChange={(e) => handleChange("city", e.target.value)}
-              placeholder="Enter city"
+              placeholder="Enter city name"
               className="crm-input has-icon"
               required
             />
@@ -128,7 +130,7 @@ const PersonalInformationTab = ({
           </label>
           <select
             disabled={!isEditable}
-            value={formData.state || ""}
+            value={formData.state || "Uttar Pradesh"}
             onChange={(e) => handleChange("state", e.target.value)}
             className="crm-select"
             required
@@ -143,6 +145,22 @@ const PersonalInformationTab = ({
             <option value="Karnataka">Karnataka</option>
             <option value="Other">Other</option>
           </select>
+        </div>
+
+        {/* Country (Default: India) */}
+        <div className="crm-field" style={{ gridColumn: "span 2" }}>
+          <label className="crm-label">Country</label>
+          <div className="crm-input-wrapper">
+            <Globe size={16} className="crm-input-icon" />
+            <input
+              type="text"
+              disabled={!isEditable}
+              value={formData.country || "India"}
+              onChange={(e) => handleChange("country", e.target.value)}
+              placeholder="India"
+              className="crm-input has-icon"
+            />
+          </div>
         </div>
       </div>
     </div>

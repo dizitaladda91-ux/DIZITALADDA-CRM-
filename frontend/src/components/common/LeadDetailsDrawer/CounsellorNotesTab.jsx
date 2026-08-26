@@ -1,10 +1,11 @@
 import React from "react";
-import { Sparkles, Tag, AlertCircle, Clock, User } from "lucide-react";
+import { Sparkles, Tag, AlertCircle, Calendar, CreditCard, DollarSign } from "lucide-react";
 import "./LeadDetailsDrawer.css";
 
 /**
- * CounsellorNotesTab Component
- * Shared Counsellor Notes, Status control, Dynamic Fields, and Interaction History timeline.
+ * CounsellorNotesTab Component (Tab 3)
+ * Guided Step 3: Guided Counselling & Contextual Action Engine
+ * Statuses: INTERESTED, FOLLOW_UP, VISITED, ENROLLED, NOT_INTERESTED, NEW
  */
 const CounsellorNotesTab = ({
   selectedStatus,
@@ -13,211 +14,242 @@ const CounsellorNotesTab = ({
   onFieldChange,
   remarks,
   onRemarksChange,
-  feedbackHistory = [],
-  historyLoading = false,
   lead,
   isEditable = true,
-  statusOptions = [],
 }) => {
-  const priority = (lead?.priority || "MEDIUM").toLowerCase();
+  const normStatus = (selectedStatus || "NEW").toUpperCase();
+  const rawPriority = (lead?.priority || "MEDIUM").toUpperCase();
   const priorityClass =
-    priority === "high"
+    rawPriority === "HIGH"
       ? "crm-badge-high"
-      : priority === "medium"
+      : rawPriority === "MEDIUM"
       ? "crm-badge-medium"
       : "crm-badge-low";
 
+  const priorityLabel = rawPriority === "HIGH" ? "HIGH 🔥" : rawPriority;
+
   return (
     <>
-      {/* STATUS & PRIORITY CARD */}
+      {/* Lead Status & Smart Priority Card */}
       <div className="crm-card">
         <div className="crm-card-header">
           <Tag className="text-blue-600" size={20} />
           <div>
-            <h3 className="crm-card-title">📌 Lead Status & Priority</h3>
-            <p className="crm-card-subtitle">Manage CRM lifecycle status and auto-derived priority</p>
+            <h3 className="crm-card-title">📌 Step 3: Lead Status & Priority Engine</h3>
+            <p className="crm-card-subtitle">Select standardized status to trigger contextual workflow</p>
           </div>
         </div>
 
         <div className="crm-grid crm-grid-2">
-          {/* Status Select */}
+          {/* Standardized Status Selector */}
           <div className="crm-field">
             <label className="crm-label">
-              Lead Status <span className="crm-required">*</span>
+              Standardized Lead Status <span className="crm-required">*</span>
             </label>
             <select
               disabled={!isEditable}
-              value={selectedStatus}
+              value={normStatus}
               onChange={(e) => onStatusSelect(e.target.value)}
               className="crm-select"
             >
-              {statusOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
+              <option value="INTERESTED">🔥 INTERESTED (High Intent)</option>
+              <option value="FOLLOW_UP">📞 FOLLOW_UP (Scheduled Callback)</option>
+              <option value="VISITED">🏫 VISITED (Campus Visited)</option>
+              <option value="ENROLLED">🎓 ENROLLED (Admission Confirmed & Fee Paid)</option>
+              <option value="NOT_INTERESTED">❌ NOT_INTERESTED (Lost / Dropped)</option>
+              <option value="NEW">🆕 NEW (Fresh Uncontacted Lead)</option>
             </select>
           </div>
 
-          {/* Derived Priority Badge */}
+          {/* Smart Priority Display */}
           <div className="crm-field">
-            <label className="crm-label">Priority (Auto Derived)</label>
+            <label className="crm-label">Smart Priority Score</label>
             <div style={{ display: "flex", alignItems: "center", height: "48px" }}>
               <span className={`crm-badge ${priorityClass}`}>
                 <AlertCircle size={14} />
-                {lead?.priority || "MEDIUM"} PRIORITY
+                {priorityLabel} PRIORITY
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* COUNSELLOR NOTES & DYNAMIC FORM CARD */}
+      {/* Dynamic Contextual Action Engine Card */}
       {isEditable && (
         <div className="crm-card" style={{ borderColor: "#BFDBFE" }}>
           <div className="crm-card-header">
             <Sparkles className="text-blue-600" size={20} />
             <div>
-              <h3 className="crm-card-title">💬 Record Today's Discussion & Feedback</h3>
-              <p className="crm-card-subtitle">Dynamic fields change according to lead status</p>
+              <h3 className="crm-card-title">⚡ Contextual Action Form</h3>
+              <p className="crm-card-subtitle">Dynamic fields based on selected status</p>
             </div>
           </div>
 
-          {/* DYNAMIC FIELDS CONTAINER */}
-          <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: "12px", border: "1px solid #E2E8F0", marginBottom: "16px" }}>
-            {/* 1. NOT_CONTACTED / NEW / CONTACTED */}
-            {(selectedStatus === "NOT_CONTACTED" || selectedStatus === "NEW" || selectedStatus === "CONTACTED") && (
-              <div className="crm-field">
-                <label className="crm-label">
-                  Uncontacted Reason <span className="crm-required">*</span>
-                </label>
-                <select
-                  value={feedbackFields.reason || ""}
-                  onChange={(e) => onFieldChange("reason", e.target.value)}
-                  className="crm-select"
-                >
-                  <option value="">-- Select Reason --</option>
-                  <option value="Switched Off">Switched Off</option>
-                  <option value="Not Reachable">Not Reachable</option>
-                  <option value="Ringing No Response">Ringing No Response</option>
-                  <option value="Invalid Number">Invalid Number</option>
-                  <option value="Busy">Busy</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            )}
-
-            {/* 2. FOLLOW_UP */}
-            {(selectedStatus === "FOLLOW_UP" || selectedStatus === "FOLLOW_UP_REQUIRED") && (
+          <div
+            style={{
+              backgroundColor: "#F8FAFC",
+              padding: "18px",
+              borderRadius: "12px",
+              border: "1px solid #E2E8F0",
+              marginBottom: "18px",
+            }}
+          >
+            {/* 1. FOLLOW_UP WORKFLOW */}
+            {normStatus === "FOLLOW_UP" && (
               <div className="crm-grid crm-grid-2">
                 <div className="crm-field">
                   <label className="crm-label">
-                    Next Follow-up Date & Time <span className="crm-required">*</span>
+                    Next Callback Date & Time <span className="crm-required">*</span>
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={feedbackFields.next_followup || ""}
-                    onChange={(e) => onFieldChange("next_followup", e.target.value)}
-                    className="crm-input"
-                  />
+                  <div className="crm-input-wrapper">
+                    <Calendar size={16} className="crm-input-icon" />
+                    <input
+                      type="datetime-local"
+                      value={feedbackFields.next_followup || ""}
+                      onChange={(e) => onFieldChange("next_followup", e.target.value)}
+                      className="crm-input has-icon"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="crm-field">
-                  <label className="crm-label">Follow-up Mode / Action</label>
+                  <label className="crm-label">Communication Channel</label>
                   <select
                     value={feedbackFields.followup_type || "CALL"}
                     onChange={(e) => onFieldChange("followup_type", e.target.value)}
                     className="crm-select"
                   >
                     <option value="CALL">Phone Call</option>
-                    <option value="WHATSAPP">WhatsApp</option>
-                    <option value="EMAIL">Email</option>
+                    <option value="WHATSAPP">WhatsApp Message</option>
                     <option value="MEETING">Campus Meeting</option>
                   </select>
                 </div>
               </div>
             )}
 
-            {/* 3. QUALIFIED / INTERESTED */}
-            {(selectedStatus === "QUALIFIED" || selectedStatus === "INTERESTED") && (
+            {/* 2. VISITED WORKFLOW */}
+            {normStatus === "VISITED" && (
               <div className="crm-grid crm-grid-3">
                 <div className="crm-field">
-                  <label className="crm-label">Walk-in Date</label>
+                  <label className="crm-label">Campus Visit Date</label>
                   <input
                     type="date"
-                    value={feedbackFields.walkin_date || ""}
-                    onChange={(e) => onFieldChange("walkin_date", e.target.value)}
+                    value={feedbackFields.visit_date || ""}
+                    onChange={(e) => onFieldChange("visit_date", e.target.value)}
                     className="crm-input"
                   />
                 </div>
 
                 <div className="crm-field">
-                  <label className="crm-label">Walk-in Time</label>
+                  <label className="crm-label">Time Slot</label>
                   <input
                     type="time"
-                    value={feedbackFields.walkin_time || ""}
-                    onChange={(e) => onFieldChange("walkin_time", e.target.value)}
+                    value={feedbackFields.visit_time || ""}
+                    onChange={(e) => onFieldChange("visit_time", e.target.value)}
                     className="crm-input"
                   />
                 </div>
 
                 <div className="crm-field">
-                  <label className="crm-label">Preferred Campus</label>
+                  <label className="crm-label">Visited Centre</label>
                   <input
                     type="text"
                     placeholder="e.g. Main Campus"
-                    value={feedbackFields.preferred_centre || ""}
-                    onChange={(e) => onFieldChange("preferred_centre", e.target.value)}
+                    value={feedbackFields.visited_centre || ""}
+                    onChange={(e) => onFieldChange("visited_centre", e.target.value)}
                     className="crm-input"
                   />
                 </div>
               </div>
             )}
 
-            {/* 4. ADMISSION_DONE / ENROLLED */}
-            {(selectedStatus === "ADMISSION_DONE" || selectedStatus === "ENROLLED") && (
-              <div className="crm-grid crm-grid-3">
-                <div className="crm-field">
-                  <label className="crm-label">Course Enrolled</label>
-                  <input
-                    type="text"
-                    placeholder="Course name"
-                    value={feedbackFields.course_name || ""}
-                    onChange={(e) => onFieldChange("course_name", e.target.value)}
-                    className="crm-input"
-                  />
+            {/* 3. ENROLLED WORKFLOW (ADMISSION & FEE LEDGER INTEGRATION) */}
+            {normStatus === "ENROLLED" && (
+              <div>
+                <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <CreditCard size={16} className="text-blue-600" />
+                  <strong style={{ fontSize: "13px", color: "#1E293B" }}>
+                    Admission Form & Fee Ledger Entry
+                  </strong>
                 </div>
 
-                <div className="crm-field">
-                  <label className="crm-label">Fee Paid (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="Amount"
-                    value={feedbackFields.fee_paid || ""}
-                    onChange={(e) => onFieldChange("fee_paid", e.target.value)}
-                    className="crm-input"
-                  />
-                </div>
+                <div className="crm-grid crm-grid-3">
+                  <div className="crm-field">
+                    <label className="crm-label">
+                      Confirmed Course <span className="crm-required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Course name"
+                      value={feedbackFields.course_name || lead?.interested_course || "BCA"}
+                      onChange={(e) => onFieldChange("course_name", e.target.value)}
+                      className="crm-input"
+                    />
+                  </div>
 
-                <div className="crm-field">
-                  <label className="crm-label">Receipt / Ref No</label>
-                  <input
-                    type="text"
-                    placeholder="Receipt #"
-                    value={feedbackFields.receipt_no || ""}
-                    onChange={(e) => onFieldChange("receipt_no", e.target.value)}
-                    className="crm-input"
-                  />
+                  <div className="crm-field">
+                    <label className="crm-label">
+                      Total Fee Amount (₹) <span className="crm-required">*</span>
+                    </label>
+                    <div className="crm-input-wrapper">
+                      <DollarSign size={16} className="crm-input-icon" />
+                      <input
+                        type="number"
+                        placeholder="e.g. 120000"
+                        value={feedbackFields.total_fee || ""}
+                        onChange={(e) => onFieldChange("total_fee", e.target.value)}
+                        className="crm-input has-icon"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="crm-field">
+                    <label className="crm-label">
+                      Paid Fee Amount (₹) <span className="crm-required">*</span>
+                    </label>
+                    <div className="crm-input-wrapper">
+                      <DollarSign size={16} className="crm-input-icon" />
+                      <input
+                        type="number"
+                        placeholder="e.g. 25000"
+                        value={feedbackFields.fee_paid || ""}
+                        onChange={(e) => onFieldChange("fee_paid", e.target.value)}
+                        className="crm-input has-icon"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="crm-field">
+                    <label className="crm-label">Receipt / Transaction No.</label>
+                    <input
+                      type="text"
+                      placeholder="Receipt #"
+                      value={feedbackFields.receipt_no || ""}
+                      onChange={(e) => onFieldChange("receipt_no", e.target.value)}
+                      className="crm-input"
+                    />
+                  </div>
+
+                  <div className="crm-field">
+                    <label className="crm-label">Next Installment Due Date</label>
+                    <input
+                      type="date"
+                      value={feedbackFields.next_due_date || ""}
+                      onChange={(e) => onFieldChange("next_due_date", e.target.value)}
+                      className="crm-input"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* 5. NOT_INTERESTED / REJECTED */}
-            {(selectedStatus === "NOT_INTERESTED" || selectedStatus === "LOST" || selectedStatus === "REJECTED") && (
+            {/* 4. NOT_INTERESTED WORKFLOW */}
+            {normStatus === "NOT_INTERESTED" && (
               <div className="crm-grid crm-grid-2">
                 <div className="crm-field">
                   <label className="crm-label">
-                    Rejection Reason <span className="crm-required">*</span>
+                    Drop / Rejection Reason <span className="crm-required">*</span>
                   </label>
                   <select
                     value={feedbackFields.rejection_reason || ""}
@@ -225,9 +257,9 @@ const CounsellorNotesTab = ({
                     className="crm-select"
                   >
                     <option value="">-- Select Reason --</option>
-                    <option value="Fee High">Fee High</option>
-                    <option value="Joined Another Institute">Joined Another Institute</option>
+                    <option value="Fee constraint / High Fee">Fee Constraint / High Fee</option>
                     <option value="Location / Distance Issue">Location / Distance Issue</option>
+                    <option value="Chose Competitor Institute">Chose Competitor Institute</option>
                     <option value="Course Not Available">Course Not Available</option>
                     <option value="Not Interested Anymore">Not Interested Anymore</option>
                     <option value="Other">Other</option>
@@ -235,10 +267,10 @@ const CounsellorNotesTab = ({
                 </div>
 
                 <div className="crm-field">
-                  <label className="crm-label">Joined Competitor (Optional)</label>
+                  <label className="crm-label">Competitor Details (Optional)</label>
                   <input
                     type="text"
-                    placeholder="Institute name"
+                    placeholder="e.g. ABC Institute"
                     value={feedbackFields.competitor_name || ""}
                     onChange={(e) => onFieldChange("competitor_name", e.target.value)}
                     className="crm-input"
@@ -246,14 +278,30 @@ const CounsellorNotesTab = ({
                 </div>
               </div>
             )}
+
+            {/* 5. INTERESTED WORKFLOW */}
+            {normStatus === "INTERESTED" && (
+              <div className="crm-field">
+                <label className="crm-label">Student Key Interest & Next Goal</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Student requested fee structure & hostel details"
+                  value={feedbackFields.interest_notes || ""}
+                  onChange={(e) => onFieldChange("interest_notes", e.target.value)}
+                  className="crm-input"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Today's Discussion Notes Textarea */}
+          {/* Discussion Remarks Textarea */}
           <div className="crm-field">
-            <label className="crm-label">Today's Discussion / Counsellor Notes</label>
+            <label className="crm-label">
+              Discussion Remarks & Counselling Summary
+            </label>
             <textarea
               rows={4}
-              placeholder="Add today's discussion, counselling notes, student concerns, parent discussion, or next action..."
+              placeholder="Record call discussion summary, student response, parent concerns, and action items..."
               value={remarks}
               onChange={(e) => onRemarksChange(e.target.value)}
               className="crm-textarea"
@@ -261,99 +309,6 @@ const CounsellorNotesTab = ({
           </div>
         </div>
       )}
-
-      {/* DATE-WISE INTERACTION HISTORY TIMELINE */}
-      <div className="crm-card">
-        <div className="crm-card-header">
-          <Clock className="text-blue-600" size={20} />
-          <div>
-            <h3 className="crm-card-title">
-              🕒 Interaction & Feedback History ({feedbackHistory.length})
-            </h3>
-            <p className="crm-card-subtitle">Complete chronological record of all recorded discussions</p>
-          </div>
-        </div>
-
-        {historyLoading ? (
-          <div style={{ textAlign: "center", padding: "32px", fontSize: "13px", color: "#64748B" }}>
-            Loading history timeline...
-          </div>
-        ) : feedbackHistory.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px", backgroundColor: "#F8FAFC", borderRadius: "12px", border: "1px dashed #CBD5E1", fontSize: "13px", color: "#64748B" }}>
-            No feedback entries recorded yet for this lead.
-          </div>
-        ) : (
-          <div className="crm-timeline">
-            {feedbackHistory.map((item, idx) => {
-              const fields = item.feedback_fields || {};
-              const formattedDateTime = item.created_at
-                ? new Date(item.created_at).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  }) +
-                  " • " +
-                  new Date(item.created_at).toLocaleTimeString("en-IN", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })
-                : "-";
-
-              return (
-                <div key={item.id || idx} className="crm-timeline-item">
-                  <div className="crm-timeline-dot" />
-                  <div className="crm-timeline-card">
-                    <div className="crm-timeline-header">
-                      <span className="crm-badge crm-badge-status">
-                        {item.status_at_feedback || "STATUS"}
-                      </span>
-
-                      <div className="crm-timeline-meta">
-                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <User size={13} />
-                          Counsellor: {item.created_by_name || "Rohit Sharma"}
-                        </span>
-                        <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "monospace" }}>
-                          <Clock size={13} />
-                          {formattedDateTime}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Key-Value Details Grid */}
-                    {Object.keys(fields).length > 0 && (
-                      <div className="crm-timeline-fields">
-                        {Object.entries(fields).map(([k, v]) => {
-                          if (!v || typeof v === "object") return null;
-                          return (
-                            <div key={k}>
-                              <span style={{ fontWeight: 700, color: "#64748B", textTransform: "uppercase", fontSize: "10px" }}>
-                                {k.replace(/_/g, " ")}:
-                              </span>{" "}
-                              <strong style={{ color: "#0F172A" }}>{String(v)}</strong>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Remarks Discussion Note */}
-                    {item.remarks && (
-                      <div className="crm-timeline-note">
-                        <strong style={{ display: "block", fontSize: "11px", textTransform: "uppercase", color: "#92400E", marginBottom: "2px" }}>
-                          Discussion Note:
-                        </strong>
-                        {item.remarks}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
     </>
   );
 };

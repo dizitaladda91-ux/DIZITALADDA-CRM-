@@ -1,10 +1,11 @@
 import React from "react";
-import { Phone, Mail, MapPin, AlertCircle, Tag, X } from "lucide-react";
+import { Phone, Mail, MapPin, Tag, X, MessageCircle } from "lucide-react";
 import "./LeadDetailsDrawer.css";
 
 /**
  * LeadSummaryHeader Component
- * Shared compact header for Admin & Employee portals.
+ * Guided Counselling Header with student avatar, dynamic status, smart priority badge,
+ * and 1-click Phone (`tel:`) + WhatsApp (`wa.me`) triggers.
  */
 const LeadSummaryHeader = ({ lead, onClose }) => {
   if (!lead) return null;
@@ -18,15 +19,24 @@ const LeadSummaryHeader = ({ lead, onClose }) => {
         .toUpperCase()
     : "LD";
 
-  const priority = (lead.priority || "MEDIUM").toLowerCase();
+  const rawPriority = (lead.priority || "MEDIUM").toUpperCase();
   const priorityClass =
-    priority === "high"
+    rawPriority === "HIGH"
       ? "crm-badge-high"
-      : priority === "medium"
+      : rawPriority === "MEDIUM"
       ? "crm-badge-medium"
       : "crm-badge-low";
 
-  const locationText = [lead.city, lead.state].filter(Boolean).join(", ");
+  const priorityLabel = rawPriority === "HIGH" ? "HIGH 🔥" : rawPriority;
+
+  const locationText = [lead.city, lead.state, lead.country || "India"]
+    .filter(Boolean)
+    .join(", ");
+
+  const cleanMobile = (lead.mobile || "").replace(/\D/g, "");
+  const whatsappUrl = `https://wa.me/91${cleanMobile}?text=${encodeURIComponent(
+    `Hello ${lead.full_name || ""}, warm greetings from IEM Admissions Team!`
+  )}`;
 
   return (
     <div className="crm-header">
@@ -34,9 +44,9 @@ const LeadSummaryHeader = ({ lead, onClose }) => {
         <div className="crm-avatar">{initials}</div>
         <div>
           <div className="crm-header-meta" style={{ marginTop: 0 }}>
-            <h2 className="crm-header-title">{lead.full_name || "Lead Details"}</h2>
+            <h2 className="crm-header-title">{lead.full_name || "Student Lead"}</h2>
             <span>
-              Lead ID: <strong style={{ color: "#2563EB" }}>{lead.lead_code || "--"}</strong>
+              Lead Code: <strong style={{ color: "#2563EB" }}>{lead.lead_code || "--"}</strong>
             </span>
           </div>
 
@@ -63,10 +73,47 @@ const LeadSummaryHeader = ({ lead, onClose }) => {
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+        {/* Quick Communication Trigger Buttons */}
+        {cleanMobile && (
+          <>
+            <a
+              href={`tel:${cleanMobile}`}
+              title="Call Student"
+              className="crm-btn-primary"
+              style={{
+                height: "36px",
+                padding: "0 12px",
+                fontSize: "12px",
+                backgroundColor: "#16A34A",
+              }}
+            >
+              <Phone size={14} />
+              <span>Call</span>
+            </a>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="WhatsApp Student"
+              className="crm-btn-primary"
+              style={{
+                height: "36px",
+                padding: "0 12px",
+                fontSize: "12px",
+                backgroundColor: "#25D366",
+              }}
+            >
+              <MessageCircle size={14} />
+              <span>WhatsApp</span>
+            </a>
+          </>
+        )}
+
+        {/* Priority & Status Badges */}
         <span className={`crm-badge ${priorityClass}`}>
-          <AlertCircle size={13} />
-          {lead.priority || "MEDIUM"} PRIORITY
+          {priorityLabel} PRIORITY
         </span>
 
         <span className="crm-badge crm-badge-status">

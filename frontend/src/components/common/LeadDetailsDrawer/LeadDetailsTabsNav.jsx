@@ -1,27 +1,32 @@
 import React from "react";
-import { User, GraduationCap, MessageSquareText } from "lucide-react";
+import { User, GraduationCap, MessageSquareText, History } from "lucide-react";
 import "./LeadDetailsDrawer.css";
 
 /**
  * LeadDetailsTabsNav Component
- * Shared 3-Tab navigation bar for Admin & Employee portals.
+ * 4-Step Guided Counselling Navigation Tabs.
  */
 const LeadDetailsTabsNav = ({ activeTab, onTabChange }) => {
   const tabs = [
     {
       id: "personal",
-      label: "Personal Information",
+      label: "Personal Contact",
       icon: <User size={16} />,
     },
     {
       id: "academic",
-      label: "Academic Information",
+      label: "Academic Profile",
       icon: <GraduationCap size={16} />,
     },
     {
       id: "counselling",
-      label: "Counsellor Notes & Feedback",
+      label: "Guided Counselling",
       icon: <MessageSquareText size={16} />,
+    },
+    {
+      id: "timeline",
+      label: "Audit Timeline & Notes",
+      icon: <History size={16} />,
     },
   ];
 

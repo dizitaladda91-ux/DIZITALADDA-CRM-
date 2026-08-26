@@ -4,6 +4,7 @@ import LeadDetailsTabsNav from "./LeadDetailsTabsNav";
 import PersonalInformationTab from "./PersonalInformationTab";
 import AcademicInformationTab from "./AcademicInformationTab";
 import CounsellorNotesTab from "./CounsellorNotesTab";
+import AuditTimelineTab from "./AuditTimelineTab";
 import LeadDrawerFooter from "./LeadDrawerFooter";
 import "./LeadDetailsDrawer.css";
 
@@ -14,9 +15,8 @@ import {
 } from "../../../services/leadFeedbackService";
 
 /**
- * Shared LeadDetailsDrawer Component
- * Enterprise CRM Lead Panel shared between Admin and Employee portals.
- * Uses 100% shared JSX, components, and CSS stylesheet.
+ * Shared LeadDetailsDrawer Component (Production V3)
+ * High-productivity 4-Step Guided Counselling Drawer (`LeadDetailsDrawer.jsx`)
  */
 const LeadDetailsDrawer = ({
   open = false,
@@ -25,24 +25,21 @@ const LeadDetailsDrawer = ({
   onStatusUpdated,
   role = "counsellor",
 }) => {
-  const isAdmin = role === "admin";
   const isCounsellor = role === "counsellor" || role === "employee";
-  const isEditable = isCounsellor; // Counsellors are guided through interactive counselling workflow; Admin views read-only audit trail
+  const isEditable = isCounsellor;
 
   const [loading, setLoading] = useState(false);
   const [leadDetails, setLeadDetails] = useState(null);
-  
-  // 3-Tab State: "personal" | "academic" | "counselling"
+
+  // 4-Tab State: "personal" | "academic" | "counselling" | "timeline"
   const [activeTab, setActiveTab] = useState("personal");
 
-  // Preserved Form State across all 3 tabs
+  // Preserved Form State across all 4 tabs
   const [personalData, setPersonalData] = useState({});
   const [academicData, setAcademicData] = useState({
     education_type: "school",
-    class_grade: "12th",
     stream: "Science",
     board: "CBSE",
-    year_of_passing: "2026",
     interested_course: "BCA",
   });
 
@@ -52,19 +49,9 @@ const LeadDetailsDrawer = ({
   const [saving, setSaving] = useState(false);
 
   // Dynamic Status & Remarks State
-  const [selectedStatus, setSelectedStatus] = useState("CONTACTED");
+  const [selectedStatus, setSelectedStatus] = useState("INTERESTED");
   const [feedbackFields, setFeedbackFields] = useState({});
   const [remarks, setRemarks] = useState("");
-
-  const STATUS_OPTIONS = [
-    { value: "NEW", label: "New Lead" },
-    { value: "CONTACTED", label: "Not Contacted / Attempted" },
-    { value: "FOLLOW_UP", label: "Follow-up Required" },
-    { value: "QUALIFIED", label: "Walk-in Scheduled / Interested" },
-    { value: "ADMISSION_DONE", label: "Admission Done / Enrolled" },
-    { value: "NOT_INTERESTED", label: "Not Interested / Lost" },
-    { value: "REJECTED", label: "Rejected" },
-  ];
 
   const loadLeadData = useCallback(async () => {
     if (!lead?.id) return;
@@ -75,7 +62,7 @@ const LeadDetailsDrawer = ({
       const leadData = response.data || response;
       setLeadDetails(leadData);
 
-      // Hydrate personal info state
+      // Hydrate personal contact info state
       setPersonalData({
         full_name: leadData.full_name || "",
         mobile: leadData.mobile || "",
@@ -83,12 +70,14 @@ const LeadDetailsDrawer = ({
         email: leadData.email || "",
         city: leadData.city || "",
         state: leadData.state || "Uttar Pradesh",
+        country: leadData.country || "India",
       });
 
       // Hydrate academic info state
       setAcademicData((prev) => ({
         ...prev,
-        interested_course: leadData.interested_course || leadData.course_name || "BCA",
+        interested_course:
+          leadData.interested_course || leadData.course_name || "BCA",
         preferred_centre: leadData.preferred_centre || "",
       }));
 
@@ -114,7 +103,11 @@ const LeadDetailsDrawer = ({
       if (historyList.length > 0) {
         const latestFeedback = historyList[0];
         const fields = latestFeedback.feedback_fields || {};
-        if (fields.education_type || fields.school_name || fields.college_name) {
+        if (
+          fields.education_type ||
+          fields.school_name ||
+          fields.college_name
+        ) {
           setAcademicData((prev) => ({
             ...prev,
             ...fields,
@@ -141,6 +134,30 @@ const LeadDetailsDrawer = ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleSaveQuickNote = async (noteText) => {
+    if (!lead?.id || !noteText) return;
+    try {
+      const payload = {
+        status: selectedStatus,
+        personal_info: personalData,
+        academic_info: academicData,
+        feedback_fields: {
+          note_type: "INTERNAL_QUICK_NOTE",
+          ...academicData,
+          ...feedbackFields,
+        },
+        remarks: noteText,
+      };
+
+      await addLeadFeedback(lead.id, payload);
+      await loadFeedbackHistory();
+      await loadLeadData();
+    } catch (error) {
+      console.error("Failed to save quick note:", error);
+      alert("Failed to save internal note");
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -171,7 +188,9 @@ const LeadDetailsDrawer = ({
         onStatusUpdated();
       }
 
-      alert("Lead profile, academic details, status & feedback saved successfully!");
+      alert(
+        "Lead profile, academic details, status & guided feedback saved successfully!"
+      );
     } catch (error) {
       console.error("Failed to save changes:", error);
       alert(error?.response?.data?.message || "Failed to save lead updates");
@@ -184,8 +203,23 @@ const LeadDetailsDrawer = ({
 
   if (loading && !leadDetails) {
     return (
-      <div className="crm-drawer-backdrop" style={{ display: "flex", itemsCenter: "center", justifyContent: "center" }}>
-        <div className="crm-card" style={{ padding: "32px", display: "flex", alignItems: "center", gap: "12px" }}>
+      <div
+        className="crm-drawer-backdrop"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          className="crm-card"
+          style={{
+            padding: "32px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
           <div
             style={{
               height: "24px",
@@ -196,7 +230,11 @@ const LeadDetailsDrawer = ({
               animation: "spin 1s linear infinite",
             }}
           />
-          <span style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>Loading Lead Details...</span>
+          <span
+            style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}
+          >
+            Loading Student Lead Details...
+          </span>
         </div>
       </div>
     );
@@ -209,15 +247,12 @@ const LeadDetailsDrawer = ({
       {/* Backdrop */}
       <div className="crm-drawer-backdrop" onClick={onClose} />
 
-      {/* Spacious CRM Drawer Panel */}
+      {/* Spacious 4-Step Guided Counselling Drawer Panel */}
       <aside className="crm-drawer-panel">
-        {/* COMPACT TOP SUMMARY HEADER */}
-        <LeadSummaryHeader
-          lead={currentLead}
-          onClose={onClose}
-        />
+        {/* HEADER & QUICK COMMUNICATION BAR */}
+        <LeadSummaryHeader lead={currentLead} onClose={onClose} />
 
-        {/* 3-TAB HORIZONTAL NAV BAR */}
+        {/* 4-STEP GUIDED TABS NAV BAR */}
         <LeadDetailsTabsNav
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -225,7 +260,7 @@ const LeadDetailsDrawer = ({
 
         {/* INDEPENDENT SCROLLING TAB CONTENT AREA */}
         <div className="crm-body-content">
-          {/* TAB 1: PERSONAL INFORMATION */}
+          {/* STEP 1: PERSONAL CONTACT INFORMATION */}
           {activeTab === "personal" && (
             <PersonalInformationTab
               formData={personalData}
@@ -234,7 +269,7 @@ const LeadDetailsDrawer = ({
             />
           )}
 
-          {/* TAB 2: ACADEMIC INFORMATION */}
+          {/* STEP 2: ACADEMIC PROFILE & PREFERENCES */}
           {activeTab === "academic" && (
             <AcademicInformationTab
               formData={academicData}
@@ -244,7 +279,7 @@ const LeadDetailsDrawer = ({
             />
           )}
 
-          {/* TAB 3: COUNSELLOR NOTES & FEEDBACK */}
+          {/* STEP 3: GUIDED COUNSELLING & CONTEXTUAL ACTION ENGINE */}
           {activeTab === "counselling" && (
             <CounsellorNotesTab
               selectedStatus={selectedStatus}
@@ -253,11 +288,19 @@ const LeadDetailsDrawer = ({
               onFieldChange={handleFeedbackFieldChange}
               remarks={remarks}
               onRemarksChange={setRemarks}
+              lead={currentLead}
+              isEditable={isEditable}
+            />
+          )}
+
+          {/* STEP 4: FULL AUDIT TIMELINE & INTERNAL NOTES */}
+          {activeTab === "timeline" && (
+            <AuditTimelineTab
               feedbackHistory={feedbackHistory}
               historyLoading={historyLoading}
               lead={currentLead}
               isEditable={isEditable}
-              statusOptions={STATUS_OPTIONS}
+              onSaveQuickNote={handleSaveQuickNote}
             />
           )}
         </div>
