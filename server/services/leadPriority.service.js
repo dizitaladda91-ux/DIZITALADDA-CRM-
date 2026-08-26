@@ -2,27 +2,28 @@
  * Lead Priority Automation Service
  * 
  * Rules:
- * 1. HIGH: High-intent / Actionable statuses (WALK_IN_SCHEDULED, WALKED_IN, QUALIFIED, INTERESTED)
+ * 1. HIGH: High-intent / Actionable statuses (INTERESTED, VISITED, QUALIFIED, WALK_IN_SCHEDULED, WALKED_IN)
  * 2. MEDIUM: Follow-up statuses (FOLLOW_UP, FOLLOW_UP_REQUIRED)
- * 3. LOW: Contacted, Not Contacted, Lost, Rejected, Closed statuses (CONTACTED, NOT_CONTACTED, NEW, PENDING, LOST, NOT_INTERESTED, REJECTED, ADMISSION_DONE, ENROLLED, COMPLETED)
+ * 3. LOW: Enrolled, Not Interested, New, Contacted, Lost (ENROLLED, NOT_INTERESTED, NEW, CONTACTED, LOST, REJECTED, ADMISSION_DONE, COMPLETED)
  */
 
 export const calculateLeadPriority = ({ status }) => {
   const normStatus = (status || "").toUpperCase();
 
-  // HIGH Priority Statuses: Walk-in / Interested / Qualified
+  // HIGH Priority: Interested / Visited
   if (
     [
+      "INTERESTED",
+      "VISITED",
+      "QUALIFIED",
       "WALK_IN_SCHEDULED",
       "WALKED_IN",
-      "QUALIFIED",
-      "INTERESTED",
     ].includes(normStatus)
   ) {
     return "HIGH";
   }
 
-  // MEDIUM Priority Statuses: Follow-up
+  // MEDIUM Priority: Follow-up
   if (
     [
       "FOLLOW_UP",
@@ -32,18 +33,17 @@ export const calculateLeadPriority = ({ status }) => {
     return "MEDIUM";
   }
 
-  // LOW Priority Statuses: Contacted, Not Contacted, Lost, Rejected, Closed, New
+  // LOW Priority: Enrolled, Not Interested, New, Contacted, Lost
   if (
     [
-      "CONTACTED",
-      "NOT_CONTACTED",
+      "ENROLLED",
+      "NOT_INTERESTED",
       "NEW",
+      "CONTACTED",
       "PENDING",
       "LOST",
-      "NOT_INTERESTED",
       "REJECTED",
       "ADMISSION_DONE",
-      "ENROLLED",
       "COMPLETED",
     ].includes(normStatus)
   ) {

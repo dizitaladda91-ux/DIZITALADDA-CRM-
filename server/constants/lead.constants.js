@@ -1,17 +1,15 @@
 /**
- * ==========================================
  * Lead Module Constants
- * ==========================================
+ * Core Lead Statuses: Interested, Follow-up, Visited, Enrolled, Not Interested (plus New)
  */
 
 export const LEAD_STATUS = Object.freeze({
   NEW: "new",
-  CONTACTED: "contacted",
-  FOLLOW_UP: "follow_up",
   INTERESTED: "interested",
-  ADMISSION_DONE: "admission_done",
+  FOLLOW_UP: "follow_up",
+  VISITED: "visited",
+  ENROLLED: "enrolled",
   NOT_INTERESTED: "not_interested",
-  LOST: "lost",
 });
 
 export const LEAD_SOURCE = Object.freeze({
