@@ -525,8 +525,15 @@ export const getMyLeadsService = async (
 
 };
 
-export const getEmployeePerformanceService = async (id) => {
-    const employee = await findEmployeeByIdRepository(id);
+export const getEmployeePerformanceService = async (id, userId = null) => {
+    let employeeId = id;
+    if (!employeeId && userId) {
+        const emp = await findEmployeeByUserIdRepository(userId);
+        if (!emp) throw new ApiError(404, "Employee profile not found.");
+        employeeId = emp.id;
+    }
+    const employee = await findEmployeeByIdRepository(employeeId);
     if (!employee) throw new ApiError(404, "Employee not found.");
-    return { employee, ...(await getEmployeePerformanceRepository(id)) };
+    return { employee, ...(await getEmployeePerformanceRepository(employeeId)) };
 };
+

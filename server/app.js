@@ -21,6 +21,8 @@ import leadAssignmentRoutes from "./routes/leadAssignmentRoutes.js";
 import followupRoutes from "./routes/followupRoutes.js";
 import leadSourceRoutes from "./routes/leadSourceRoutes.js";
 import leadRoutingRoutes from "./routes/leadRoutingRoutes.js";
+import notificationRoutes from "./routes/notification.routes.js";
+import employeePortalRoutes from "./routes/employeePortal.routes.js";
 
 /* Middlewares */
 import { globalLimiter } from "./middleware/rateLimiter.js";
@@ -28,7 +30,6 @@ import requestId from "./middleware/requestId.js";
 import requestLogger from "./middleware/requestLogger.js";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
-import employeePortalRoutes from "./routes/employeePortal.routes.js";
 
 const app = express();
 
@@ -47,16 +48,12 @@ const allowedOrigins = [...new Set([
 ])];
 
 /**
- * =====================================================
  * Environment Validation
- * =====================================================
  */
 validateEnv();
 
 /**
- * =====================================================
  * Core Middlewares
- * =====================================================
  */
 app.use(cors({
   origin(origin, callback) {
@@ -84,9 +81,7 @@ app.use(
 );
 
 /**
- * =====================================================
  * Security Middlewares
- * =====================================================
  */
 app.use(helmet());
 app.use(compression());
@@ -94,18 +89,14 @@ app.use(hpp());
 app.use(globalLimiter);
 
 /**
- * =====================================================
  * Logging
- * =====================================================
  */
 app.use(requestId);
 app.use(requestLogger);
 app.use(morgan("dev"));
 
 /**
- * =====================================================
  * Root Endpoint
- * =====================================================
  */
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -120,16 +111,12 @@ app.get("/favicon.ico", (req, res) => {
 });
 
 /**
- * =====================================================
  * Health Routes
- * =====================================================
  */
 app.use("/api", healthRoutes);
 
 /**
- * =====================================================
  * API Routes
- * =====================================================
  */
 app.use("/auth", authRoutes);
 app.use("/api/auth", authRoutes);
@@ -145,18 +132,15 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/followups", followupRoutes);
 app.use("/api/lead-sources", leadSourceRoutes);
 app.use("/api/lead-routing", leadRoutingRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 /**
- * =====================================================
  * 404 Handler
- * =====================================================
  */
 app.use(notFound);
 
 /**
- * =====================================================
  * Global Error Handler
- * =====================================================
  */
 app.use(errorHandler);
 

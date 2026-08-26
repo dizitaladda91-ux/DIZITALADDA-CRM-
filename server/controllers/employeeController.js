@@ -274,6 +274,12 @@ export const getEmployeePerformanceController = asyncHandler(async (req, res) =>
     return res.status(200).json(new ApiResponse(200, performance, "Employee performance fetched successfully."));
 });
 
+export const getMyPerformanceController = asyncHandler(async (req, res) => {
+    const performance = await getEmployeePerformanceService(null, req.user.id);
+    return res.status(200).json(new ApiResponse(200, performance, "My performance scorecards fetched successfully."));
+});
+
+
 /**
  * =====================================================
  * Get My Leads Controller
