@@ -831,39 +831,58 @@ export const getFollowupsRepository = async ({
     `;
 
     const [dataResult, countResult] = await Promise.all([
-
         pool.query(dataQuery, values),
-
         pool.query(countQuery, searchResult.values),
-
     ]);
 
-    const total = Number(countResult.rows[0].total);
+    let dataList = dataResult.rows;
+    let total = Number(countResult.rows[0].total || 0);
+
+    // Direct Sync with `leads` table if lead_followups contains no rows for employee
+    if (dataList.length === 0 && employeeId) {
+      try {
+        const leadsQuery = `
+          SELECT
+            l.id AS id,
+            l.id AS lead_id,
+            l.lead_code,
+            l.full_name AS lead_name,
+            l.mobile,
+            l.email,
+            l.interested_course,
+            l.status AS lead_status,
+            l.priority,
+            l.next_followup AS next_followup_at,
+            'CALL' AS followup_type,
+            CASE WHEN UPPER(l.status) IN ('ENROLLED', 'ADMISSION', 'ADMISSION_DONE', 'NOT_INTERESTED', 'COMPLETED') THEN 'COMPLETED' ELSE 'PENDING' END AS status,
+            l.remarks
+          FROM leads l
+          WHERE l.assigned_to = $1 AND l.is_deleted = FALSE AND l.next_followup IS NOT NULL
+          ORDER BY l.next_followup ASC
+          LIMIT $2 OFFSET $3;
+        `;
+        const [leadsRes, countRes] = await Promise.all([
+          pool.query(leadsQuery, [employeeId, pagination.limit, pagination.offset]),
+          pool.query(`SELECT COUNT(*) FROM leads WHERE assigned_to = $1 AND is_deleted = FALSE AND next_followup IS NOT NULL;`, [employeeId]),
+        ]);
+        dataList = leadsRes.rows;
+        total = Number(countRes.rows[0].count || 0);
+      } catch (syncErr) {
+        console.warn("Direct leads table sync notice:", syncErr.message);
+      }
+    }
 
     return {
-
-        data: dataResult.rows,
-
+        data: dataList,
         pagination: {
-
             page: pagination.page,
-
             limit: pagination.limit,
-
             total,
-
-            totalPages: Math.ceil(total / pagination.limit),
-
-            hasNext:
-                pagination.page < Math.ceil(total / pagination.limit),
-
-            hasPrevious:
-                pagination.page > 1,
-
+            totalPages: Math.ceil(total / pagination.limit) || 1,
+            hasNext: pagination.page < Math.ceil(total / pagination.limit),
+            hasPrevious: pagination.page > 1,
         },
-
     };
-
 };
 
 export const getTodayFollowupsRepository = (
