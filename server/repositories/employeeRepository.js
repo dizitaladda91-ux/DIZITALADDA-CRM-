@@ -916,9 +916,10 @@ export const getEmployeePerformanceRepository = async (employeeId, timeframe = "
           WHERE e.id = $1
         `, [employeeId]),
         pool.query(`
-          SELECT COALESCE(SUM(paid_fee), 0) AS total_revenue
-          FROM admissions
-          WHERE assigned_to = $1;
+          SELECT COALESCE(SUM(a.paid_fee), 0) AS total_revenue
+          FROM admissions a
+          LEFT JOIN leads l ON l.id = a.lead_id
+          WHERE a.assigned_to = $1 OR l.assigned_to = $1;
         `, [employeeId]),
         pool.query(`
           SELECT
