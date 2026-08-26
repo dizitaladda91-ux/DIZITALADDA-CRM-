@@ -1,3 +1,4 @@
+import React from "react";
 import {
   LayoutDashboard,
   Users,
@@ -7,7 +8,6 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-
 import { NavLink, useNavigate } from "react-router-dom";
 import "./EmployeeSidebar.css";
 import { useAuth } from "../../context/AuthContext";
@@ -47,26 +47,26 @@ const menuItems = [
 ];
 
 const EmployeeSidebar = ({ isOpen = false, onToggle = () => {} }) => {
-
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const handleLogout = () => {
-
     logout();
-
-    navigate("/login", {
-      replace: true,
-    });
-
+    navigate("/", { replace: true });
   };
 
   return (
     <>
-      <div className={`employee-sidebar-overlay ${isOpen ? "show" : ""}`} onClick={onToggle} />
+      <div
+        className={`employee-sidebar-overlay ${isOpen ? "show" : ""}`}
+        onClick={onToggle}
+      />
       <aside className={`employee-sidebar ${isOpen ? "open" : ""}`}>
         <div className="employee-sidebar-logo">
-          <img src={logo} alt="DizitalAdda — India's Most Recommended Digital Marketing Institute" />
+          <img
+            src={logo}
+            alt="DizitalAdda — India's Most Recommended Digital Marketing Institute"
+          />
         </div>
 
         <nav className="employee-sidebar-menu">

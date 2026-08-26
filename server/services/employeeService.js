@@ -486,6 +486,12 @@ export const getEmployeeStatisticsService = async () => {
 };
 
 /**
+
+    return await getEmployeeStatisticsRepository();
+
+};
+
+/**
  * =====================================================
  * Get My Leads Service
  * =====================================================
@@ -495,40 +501,22 @@ export const getMyLeadsService = async (
   userId,
   filters
 ) => {
-
-  // ==========================
-  // Find Employee
-  // ==========================
-
-  const employee =
-    await findEmployeeByUserIdRepository(userId);
+  const employee = await ensureEmployeeProfileForUser(userId);
 
   if (!employee) {
-
-    throw new Error(
-      "Employee profile not found."
-    );
-
+    throw new Error("Employee profile could not be linked.");
   }
 
-  // ==========================
-  // Get Leads
-  // ==========================
-
   return await getMyLeadsRepository({
-
     employeeId: employee.id,
-
     ...filters,
-
   });
-
 };
 
 export const getEmployeePerformanceService = async (id, userId = null) => {
     let employeeId = id;
     if (!employeeId && userId) {
-        const emp = await findEmployeeByUserIdRepository(userId);
+        const emp = await ensureEmployeeProfileForUser(userId);
         if (!emp) throw new ApiError(404, "Employee profile not found.");
         employeeId = emp.id;
     }
@@ -536,4 +524,3 @@ export const getEmployeePerformanceService = async (id, userId = null) => {
     if (!employee) throw new ApiError(404, "Employee not found.");
     return { employee, ...(await getEmployeePerformanceRepository(employeeId)) };
 };
-

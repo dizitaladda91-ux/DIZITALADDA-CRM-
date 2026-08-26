@@ -1,46 +1,53 @@
+import React from "react";
 import "./MyLeadsHeader.css";
-import { Plus, Download } from "lucide-react";
+import { Calendar, GraduationCap, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const MyLeadsHeader = () => {
+  const navigate = useNavigate();
 
-    return (
+  return (
+    <div className="my-leads-header">
+      <div className="header-left">
+        <h2>👥 My Leads Pipeline</h2>
+        <p>
+          Manage, track, and counsel all assigned student leads from one place.
+        </p>
+      </div>
 
-        <div className="my-leads-header">
+      <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <button
+          type="button"
+          className="export-btn"
+          onClick={() => navigate("/employee/followups")}
+          title="Open Follow-up Planner"
+        >
+          <Calendar size={18} />
+          <span>Follow-up Planner</span>
+        </button>
 
-            <div className="header-left">
+        <button
+          type="button"
+          className="export-btn"
+          onClick={() => navigate("/employee/admissions")}
+          title="Open Admissions Ledger"
+        >
+          <GraduationCap size={18} />
+          <span>My Admissions</span>
+        </button>
 
-                <h2>My Leads</h2>
-
-                <p>
-                    Manage and track all assigned leads from one place.
-                </p>
-
-            </div>
-
-            <div className="header-right">
-
-                <button className="export-btn">
-
-                    <Download size={18} />
-
-                    Export
-
-                </button>
-
-                <button className="followup-btn">
-
-                    <Plus size={18} />
-
-                    Add Follow-up
-
-                </button>
-
-            </div>
-
-        </div>
-
-    );
-
+        <button
+          type="button"
+          className="followup-btn"
+          onClick={() => navigate("/employee/profile")}
+          title="View Performance Scorecard"
+        >
+          <Award size={18} />
+          <span>My Scorecard</span>
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default MyLeadsHeader;
