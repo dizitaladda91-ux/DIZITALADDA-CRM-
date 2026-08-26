@@ -379,33 +379,31 @@ export async function createFollowupService(
  * file's audit notes) rather than looked up again here.
  * ============================================================================
  */
+import { ensureEmployeeProfileForUser } from "./employeePortal.service.js";
+
 export async function getAllFollowupsService(
   filters = {},
   currentUser
 ) {
-
   const scopedFilters = { ...filters };
 
-  if (currentUser?.role === USER_ROLE.COUNSELLOR) {
-
-    if (!currentUser.employee_id) {
-
-      throw new ApiError(
-        403,
-        "No employee profile is linked to this account. Contact an administrator."
-      );
-
+  if (currentUser && (currentUser.role === USER_ROLE.COUNSELLOR || currentUser.role === "COUNSELLOR")) {
+    let empId = currentUser.employee_id;
+    if (!empId && currentUser.id) {
+      const emp = await ensureEmployeeProfileForUser(currentUser.id);
+      empId = emp ? emp.id : null;
     }
 
-    scopedFilters.employeeId = currentUser.employee_id;
-
+    if (empId) {
+      scopedFilters.employeeId = empId;
+    }
   }
 
   return await getFollowupsRepository(
     scopedFilters
   );
-
 }
+
 
 /**
  * ============================================================================

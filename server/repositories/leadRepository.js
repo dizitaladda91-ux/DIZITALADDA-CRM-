@@ -498,8 +498,7 @@ export const getLeadsRepository = async (filters) => {
  * =====================================================
  */
 
-export const getMyLeadsRepository = async (filters) => {
-
+export const getMyLeadsRepository = async (filters = {}) => {
   const {
     employeeId,
     page = 1,
@@ -511,8 +510,21 @@ export const getMyLeadsRepository = async (filters) => {
     order = "DESC",
   } = filters;
 
+  if (!employeeId) {
+    return {
+      leads: [],
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        totalRecords: 0,
+        totalPages: 0,
+      },
+    };
+  }
+
   const values = [employeeId];
   let index = 2;
+
 
   let whereClause = `
     WHERE
