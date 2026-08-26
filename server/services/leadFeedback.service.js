@@ -118,6 +118,38 @@ export const addLeadFeedbackService = async (
 
     const updatedLead = updateResult.rows[0];
 
+    // 3.5. Follow-up Lifecycle Automation:
+    // Mark existing PENDING follow-up tasks as COMPLETED
+    try {
+      await client.query(`
+        UPDATE lead_followups
+        SET status = 'COMPLETED',
+            outcome = $1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE lead_id = $2 AND status = 'PENDING';
+      `, [targetStatus.toUpperCase(), leadId]);
+
+      // If status is FOLLOW_UP and a callback date is provided, create new PENDING follow-up task
+      if (targetStatus.toUpperCase() === "FOLLOW_UP" && nextFollowup) {
+        await client.query(`
+          INSERT INTO lead_followups (
+            lead_id, employee_id, followup_type, status, outcome, priority, next_followup_at, remarks, created_by
+          )
+          VALUES ($1, $2, $3, 'PENDING', 'RESCHEDULED', $4, $5, $6, $7);
+        `, [
+          leadId,
+          lead.assigned_to,
+          feedback_fields.followup_type || "CALL",
+          calculatedPriority,
+          nextFollowup,
+          summaryText || "Rescheduled callback",
+          currentUser.id,
+        ]);
+      }
+    } catch (fupErr) {
+      console.warn("Follow-up completion automation notice:", fupErr.message);
+    }
+
     // Auto-create/sync Admission Ledger if status is ENROLLED
     if (["ENROLLED", "ADMISSION", "ADMISSION_DONE"].includes(targetStatus.toUpperCase())) {
       try {
